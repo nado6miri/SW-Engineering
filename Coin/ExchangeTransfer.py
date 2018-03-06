@@ -177,8 +177,8 @@ class MyWindow(QMainWindow, form_class) :
 			return client;
 		elif (kindofexchange == "Binance") :
 			#print("\ngetConnection : Binance");
-			api_key = "D0eZpGTPLSsmmVKNaQfmcF84SeimFX884i5hkz4ESHse4IG93KVTmpN5Zn5Rw996";
-			api_secret = "o1CShHsHxVzzPmGH1mxRrG9Pw4rcXoTKNM9sxG9KKMWDBe3yRNzArKFbOxYGPU7j";
+			api_key = "AD0eZpGTPLSsmmVKNaQfmcF84SeimFX884i5hkz4ESHse4IG93KVTmpN5Zn5Rw996";
+			api_secret = "Ao1CShHsHxVzzPmGH1mxRrG9Pw4rcXoTKNM9sxG9KKMWDBe3yRNzArKFbOxYGPU7j";
 			client = Client(api_key, api_secret)
 			return client;
 		else :
