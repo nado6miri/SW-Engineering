@@ -30,7 +30,7 @@ def downloadImage(srcUrl, data):
         basename = os.path.basename(src)
         targetFile = os.path.join('DOWNLOAD', basename)
 
-        print "Downloading...", src
+        print ("Downloading...", src)
         urlretrieve(src, targetFile)
 
 def main():
@@ -44,10 +44,9 @@ def main():
     data = resp.read().decode(charset)
     conn.close()
 
-    print "\n>>>>>>>>> Download Images from", host
+    print ("\n>>>>>>>>> Download Images from", host)
     url = urlunparse(('http', host, '', '', '', ''))
     downloadImage(url, data)
 
 if __name__ == '__main__':
     main()
-

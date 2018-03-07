@@ -12,7 +12,6 @@ if __name__ == '__main__' :
 
     from wsgiref.simple_server import make_server
 
-    print "Started WSGI Server on port 8888..."
+    print ("Started WSGI Server on port 8888...")
     server = make_server( '', 8888, my_app)
     server.serve_forever()
-

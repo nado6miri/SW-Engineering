@@ -1,2 +1,2 @@
-import urllib2
-print urllib2.urlopen("http://www.example.com").read()
+import urllib.request
+print (urllib.request.urlopen("http://www.example.com").read())

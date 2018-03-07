@@ -7,9 +7,9 @@ language = form.getvalue('language')
 framework = form.getvalue('framework')
 email = form.getvalue('email')
 
-print "Content-type: text/plain"
-print '\r'
-print "Welcome, CGI Scripts"
-print "language is", language
-print "framework is", framework
-print "email is", email
+print ("Content-type: text/plain")
+print ('\r')
+print ("Welcome, CGI Scripts")
+print ("language is", language)
+print ("framework is", framework)
+print ("email is", email)
