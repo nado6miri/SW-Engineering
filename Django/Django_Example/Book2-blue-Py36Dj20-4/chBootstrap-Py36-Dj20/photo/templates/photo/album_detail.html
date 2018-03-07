@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}album_detail.html{% endblock %}
+
+{% block content %}
+
+    <h2>
+        {{ object.name }}&emsp;
+        <small><i>{{ object.description }}</i></small>
+    </h2>
+
+    <hr style="margin:0 0 20px 0;" />
+
+    <div class="row">
+
+        {% for photo in object.photo_set.all %}
+        <div class="col-md-3">
+            <div class="tthumbnail">
+                <a href="{{ photo.get_absolute_url }}">
+                    <img src="{{ photo.image.thumb_url }}" style="width:100%; border: 5px solid #bbb;">
+                </a>
+                <ul class="caption" style="margin:0 0 50px 0;">
+                    <li>{{ photo.title }}</li>
+                    <li>{{ photo.upload_date|date:"Y-m-d" }}</li>
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+{% endblock %}

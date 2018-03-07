@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load staticfiles widget_tweaks %}
+
+{% block title %}post_form.html{% endblock %}
+
+{% block extra-style %}
+<style>
+    .slug-grey {background-color: #ddd;)
+</style>
+{% endblock %}
+
+{% block content %}
+
+    <h1>Post Create/Update - {{user}}</h1>
+    <p class="text-muted">This is a creation or update form for your post.</p>
+
+    <form class="form-horizontal" action="." method="post">{% csrf_token %}
+
+        <fieldset style="border:1px solid #ccc; padding:20px 0 0 0;">
+
+            {% for field in form %}
+
+            {% if field.name == "slug" %}
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="id_{{ field.name }}">{{ field.label }}</label>
+                <div class="col-sm-6">
+                    {{ field|add_class:"slug-grey form-control"|attr:"readonly" }}
+                </div>
+                {% if field.help_text %}
+                <small class="text-muted">{{ field.help_text }}</small>
+                {% endif %}
+            </div>
+
+            {% else %}
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="id_{{ field.name }}">{{ field.label }}</label>
+                <div class="col-sm-6">
+                    {{ field|add_class:"form-control" }}
+                </div>
+                {% if field.help_text %}
+                <small class="text-muted">{{ field.help_text }}</small>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% endfor %}
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-5">
+                    <input type="submit" value="Submit" class="btn btn-info"/>
+                </div>
+            </div>
+
+        </fieldset>
+
+    </form>
+
+    <script type="text/javascript">document.getElementById('id_title').focus();
+    </script>
+
+{% endblock %}

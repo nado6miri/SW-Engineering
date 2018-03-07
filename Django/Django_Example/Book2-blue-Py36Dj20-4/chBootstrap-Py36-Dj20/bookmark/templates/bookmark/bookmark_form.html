@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load staticfiles widget_tweaks %}
+
+{% block title %}bookmark_form.html{% endblock %}
+
+{% block content %}
+
+    <h1>Bookmark Create/Update - {{user}}</h1>
+    <p class="text-muted">This is a creation or update form for your bookmark.</p>
+
+    <form class="form-horizontal" action="." method="post">{% csrf_token %}
+
+        <fieldset style="border:1px solid #ccc; padding:20px 0 0 0;">
+
+            <div class="form-group">
+                <label for="id_title" class="col-sm-2 control-label">{{ form.title.label}}</label>
+                <div class="col-sm-5">
+                    {{ form.title|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_url" class="col-sm-2 control-label">{{ form.url.label }}</label>
+                <div class="col-sm-5">
+                    {{ form.url|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-5">
+                    <input type="submit" value="Submit" class="btn btn-info"/>
+                </div>
+            </div>
+
+        </fieldset>
+
+    </form>
+
+    <script type="text/javascript">document.getElementById('id_title').focus();</script>
+
+{% endblock %}

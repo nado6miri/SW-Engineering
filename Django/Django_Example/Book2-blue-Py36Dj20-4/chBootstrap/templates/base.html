@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="ko">
+
+<head>
+
+    <!-- from getbootstrap.com -->
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>{% block title %}Django Web Programming{% endblock %}</title>
+
+    <!-- Bootstrap -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+    <!-- my css -->
+    <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "css/base.css" %}{% endblock %}" />
+    <link rel="stylesheet" type="text/css" href="{% block extrastyle %}{% endblock %}" />
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+<style>
+body {
+  padding-top: 90px;
+}
+</style>
+
+</head>
+
+<body role="document">
+
+    <!-- first line MENU -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'bookmark:index' %}">Bookmark</a></li>
+            <li><a href="{% url 'blog:index' %}">Blog</a></li>
+            <li><a href="{% url 'photo:index' %}">Photo</a></li>
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Add<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="{% url 'bookmark:add' %}">Bookmark</a></li>
+                <li><a href="{% url 'blog:add' %}">Post</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="{% url 'photo:album_add' %}">Album</a></li>
+                <li><a href="{% url 'photo:photo_add' %}">Photo</a></li>
+              </ul>
+            </li>
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Change <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="{% url 'bookmark:change' %}">Bookmark</a></li>
+                <li><a href="{% url 'blog:change' %}">Post</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="{% url 'photo:album_change' %}">Album</a></li>
+                <li><a href="{% url 'photo:photo_change' %}">Photo</a></li>
+              </ul>
+            </li>
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Util<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                 <li><a href="{% url 'blog:post_archive' %}">Archive</a></li>
+                 <li><a href="{% url 'blog:search' %}">Search</a></li>
+                 <li><a href="{% url 'admin:index' %}">Admin</a></li>
+              </ul>
+            </li>
+
+          </ul>
+
+          <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown">
+                {% if user.is_active %}
+                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                      <span class="glyphicon glyphicon-user"></span> {% firstof user.get_short_name user.get_username %}</a>
+                   <ul class="dropdown-menu">
+                     <li><a href="{% url 'password_change' %}">Change Password</a></li>
+                     <li><a href="{% url 'logout' %}">Logout</a></li>
+                   </ul>
+                {% else %}
+                   <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                      <span class="glyphicon glyphicon-user"></span> Anonymous</a>
+                   <ul class="dropdown-menu">
+                     <li><a href="{% url 'login' %}">Login</a></li>
+                     <li><a href="{% url 'register' %}">Register</a></li>
+                   </ul>
+                {% endif %}
+              </li>
+          </ul>
+
+          <form class="navbar-form navbar-right" role="search" action="{% url 'blog:bssearch' %}">
+            <div class="form-group" style="display:inline;">
+              <div class="input-group">
+                <input type="text" class="form-control" name="search" placeholder="search blog contents">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+              </div>
+            </div>
+          </form>
+
+        </div><!--/.nav-collapse -->
+      </div><!--/.container -->
+    </nav><!--/.navbar -->
+
+    <div class="container">
+    {% block content %}{% endblock %}
+
+    {% block footer %}{% endblock %}
+    </div> <!-- /container -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+</body>
+</html>

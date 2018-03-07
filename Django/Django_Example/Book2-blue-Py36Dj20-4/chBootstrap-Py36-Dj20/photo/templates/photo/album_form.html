@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load staticfiles widget_tweaks %}
+
+{% block title %}album_form.html{% endblock %}
+
+{% block content %}
+
+    <h1>Album-Photo InlineFormSet</h1>
+    <p class="text-muted">Create or Update Album contents.</p>
+
+    {% if form.is_multipart or formset.is_multipart %}
+    <form class="form-horizontal" enctype="multipart/form-data" method="post" action=".">
+    {% else %}
+    <form class="form-horizontal" method="post" action=".">
+    {% endif %}
+    {% csrf_token %}
+
+        <fieldset style="border:1px solid #ccc; padding:20px 0 0 0;">
+
+            <div class="form-group">
+                <label for="id_name" class="col-sm-2 control-label">{{ form.name.label }}</label>
+                <div class="col-sm-6">
+                    {{ form.name|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_description" class="col-sm-2 control-label">{{ form.description.label }}</label>
+                <div class="col-sm-6">
+                    {{ form.description|add_class:"form-control" }}
+                </div>
+            </div>
+
+        </fieldset>
+
+        <p class="text-muted" style="margin:20px 0 0 0;">Create or Update Photo contents.</p>
+
+        {{ formset.management_form }}
+        {% for form in formset %}
+            {{ form.id }}
+
+        <fieldset style="border:1px solid #ccc; padding:20px 0 0 0;">
+
+            <div class="form-group">
+                <label for="id_image" class="col-sm-2 control-label">{{ form.image.label }}</label>
+                <div class="col-sm-6">
+                    {{ form.image|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_title" class="col-sm-2 control-label">{{ form.title.label }}</label>
+                <div class="col-sm-6">
+                    {{ form.title|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_description" class="col-sm-2 control-label">{{ form.description.label }}</label>
+                <div class="col-sm-6">
+                    {{ form.description|add_class:"form-control" }}
+                </div>
+            </div>
+
+        </fieldset>
+        {% endfor %}
+
+        <div class="form-group" style="margin:10px 0 0 0">
+            <div class="col-sm-offset-2 col-sm-6">
+                <input type="submit" value="Submit" class="btn btn-info"/>
+            </div>
+        </div>
+
+    </form>
+
+    <script type="text/javascript">document.getElementById('id_name').focus();</script>
+
+{% endblock %}

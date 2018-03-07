@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load staticfiles widget_tweaks %}
+
+{% block title %}post_search.html{% endblock %}
+
+{% block content %}
+
+    <h1>Blog Search</h1>
+
+    <form class="form-inline" action="." method="post" style="margin:20px 0 0 50px;">{% csrf_token %}
+
+        <div class="form-group">
+            <label class="control-label" for="id_search_word">{{ form.search_word.label_tag }}</label>
+            {{ form.search_word|add_class:"form-control" }}
+        </div>
+        <input type="submit" value="Submit" class="btn btn-info">
+
+    </form>
+
+    <br/><br/>
+
+    {% if object_list %}
+    {% for post in object_list %}
+        <h2><a href='{{ post.get_absolute_url }}'>{{ post.title }}</a></h2>
+        {{ post.modify_date|date:"N d, Y" }}
+        <p>{{ post.description }}</p>
+    {% endfor %}
+
+    {% elif search_term %}
+    <b><i>Search Word({{ search_term }}) Not Found !</i></b>
+    {% endif %}
+
+{% endblock %}

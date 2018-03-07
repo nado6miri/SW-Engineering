@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}album_list.html{% endblock %}
+
+{% block content %}
+
+    {% for item in object_list %}
+
+    <h2>
+        <a href="{% url 'photo:album_detail' item.id %}">{{ item.name }}</a>&emsp;
+        <small><i>{{ item.description }}</i></small>
+    </h2>
+
+    <hr style="margin:0 0 20px 0;" />
+
+    <div class="row">
+        <div class="col-md-1"></div>
+
+        {% for photo in item.photo_set.all|slice:":5" %}
+        <div class="col-md-2">
+            <div class="thumbnail">
+                <a href="{{ photo.get_absolute_url }}">
+                <img src="{{ photo.image.thumb_url }}" style="width:100%">
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    {% endfor %}
+
+{% endblock %}
