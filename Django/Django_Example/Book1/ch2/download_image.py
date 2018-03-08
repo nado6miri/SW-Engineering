@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 #
-import httplib
-from urlparse import urljoin, urlunparse
-from urllib import urlretrieve
-from HTMLParser import HTMLParser
+import http.client
+from urllib.parse import *
+from urllib.request import *
+#from urllib.parse import urlparse, urlunparse, urljoin, urlretrieve
+from urllib import *
+from html.parser import HTMLParser
 import os
 
 class ImageParser(HTMLParser):
@@ -17,7 +19,6 @@ class ImageParser(HTMLParser):
                 self.result.append(value)
 
 def downloadImage(srcUrl, data):
-
     if not os.path.exists('DOWNLOAD') :
         os.makedirs('DOWNLOAD')
 
@@ -36,16 +37,17 @@ def downloadImage(srcUrl, data):
 def main():
     host = "www.google.co.kr"
 
-    conn = httplib.HTTPConnection(host)
+    conn = http.client.HTTPConnection(host)
     conn.request("GET", '')
     resp = conn.getresponse()
 
-    charset = resp.msg.getparam('charset')
+    charset = resp.headers.get_content_charset()
     data = resp.read().decode(charset)
     conn.close()
 
     print ("\n>>>>>>>>> Download Images from", host)
     url = urlunparse(('http', host, '', '', '', ''))
+    print(url)
     downloadImage(url, data)
 
 if __name__ == '__main__':

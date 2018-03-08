@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #
-from urllib2 import urlopen
-from HTMLParser import HTMLParser
+import urllib.request
+from html.parser import HTMLParser
+import html.entities
 
 class ImageParser(HTMLParser):
     def handle_starttag(self, tag, attrs):
@@ -22,11 +23,12 @@ def parseImage(data):
 def main():
     url = "http://www.google.co.kr"
 
-    f = urlopen(url)
-    charset = f.info().getparam('charset')
+    f = urllib.request.urlopen(url)
+    charset = f.headers.get_content_charset()
     data = f.read().decode(charset)
     f.close()
 
+    print (data)
     print ("\n>>>>>>>>> Fetch Images from", url)
     parseImage(data)
 

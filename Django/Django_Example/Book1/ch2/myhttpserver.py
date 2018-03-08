@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
-from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class MyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        self.wfile.write("Hello World")
+        msg = "Hello World".encode('utf-8')
+        
+        self.wfile.write(msg)
 
 if __name__ == '__main__':
     server = HTTPServer(('', 8888), MyHandler)
