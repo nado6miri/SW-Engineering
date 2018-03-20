@@ -43,30 +43,12 @@ if __name__ == "__main__" :
     dissue = dev_jira.issue("LEADSWETDI-1")
     print("[Dev Tracker] Get JIRA Issue with All fields")
 
-    # Get issue with specific Fields in Dev Tracker
-    setfield = ('summary, comment, assignee')
-    dissue = dev_jira.issue("LEADSWETDI-1", fields=setfield)
-    print("[Dev Tracker] Get JIRA Issue with Specific fields")
-
-    #====================================================================================================================
-    # Get filtered issue with Filter ID in Dev Tracker
-    #====================================================================================================================
-    setFilterID = 'filter = 34905'
-    setfield = ('summary, comment, assignee')
-    dissue = dev_jira.search_issues(setFilterID, startAt = 0, maxResults = 1000, fields = setfield, expand=None)
-    print("[Dev Tracker] Get JIRA Issue with Specific Filter ID: " + setFilterID)
-
-    # Get Filtered issue with JQL Querfy String in Dev Tracker
-    setFilter = 'project = TVPLAT AND issuetype = Initiative AND status in (approved, "BACKLOG REFINEMENT", "In Progress", Delivered)'
-    dissue = dev_jira.search_issues(setFilter)
-    print("[Dev Tracker] Get JIRA Issue with Specific Filter String: " + setFilter)
-
 
     #====================================================================================================================
     # How to create Jira Issue in Dev Tracker
     #====================================================================================================================
     # Case 1:
-    new_dissue = jira.create_issue(project='GSWDIM', summary='New issue from jira-python', description='Look into this one', issuetype={'name': 'Bug'})
+    new_dissue = dev_jira.create_issue(project='GSWDIM', summary='New issue from jira-python', description='Look into this one', issuetype={'name': 'Bug'})
 
     # Case 2:
     issue_dict = {
@@ -227,28 +209,20 @@ if __name__ == "__main__" :
 
 
 
-    #====================================================================================================================
+    #===========================================================================
     # Attachment control in Dev Tracker
-    #====================================================================================================================
-    # Case 1:
     issue = dev_jira.issue("GSWDIM-22479")
-    dev_jira.add_attachment(issue=issue, attachment='DDTS Layout.jpg')
+    #jira.add_attachment(issue=issue, attachment='Jira_자동_등록 - webOS4.0 Issue.xlsm')
 
-    # Case 2:
-    with open('Jira_Issue.xlsm', 'rb') as f:    #file name에 한글은 오류가 나네요.....
-        dev_jira.add_attachment(issue=issue, attachment=f)
+    # read and upload a file (note binary mode for opening, it's important):
+    with open('Jira_자동_등록 - webOS4.0 Issue.xlsm', 'rb') as f:
+        jira.add_attachment(issue=issue, attachment=f)
 
-    # Case 3:
     # attach file from memory (you can skip IO operations). In this case you MUST provide `filename`.
     import StringIO
     attachment = StringIO.StringIO()
     attachment.write(data)
-    dev_jira.add_attachment(issue=issue, attachment=attachment, filename='content.txt')
-
-    # Case 4: Delete Attachment
-    issue.fields.attachment[0].delete()
-    dev_jira.delete_attachment(1)
-
+    jira.add_attachment(issue=issue, attachment=attachment, filename='content.txt')
 
 
     #===========================================================================
