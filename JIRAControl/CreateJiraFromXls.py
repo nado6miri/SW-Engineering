@@ -23,17 +23,145 @@ QTracker = 'http://hlm.lge.com/qi'
 userID = 'sungbin.na'
 userPasswd = 'Sungbin'
 
-'''
-# 엑셀파일 열기
-excel_file = xlsrd.load_workbook('hello.xlsx')
-excel_sheet = excel_file['Initiative']
+dissue_dict = {
+    'project': {'key': 'GSWDIM'},
+    'components' : [ ],
+    'summary': 'New issue from jira-python',
+    'description': 'Look into this one',
+    'parent' : { 'id' :  ''},
+    'issuetype' : { 'name' : 'Sub-task' },
+    #'issuetype': {'id': '5'},
+    'assignee': {"name":"sungbin.na", "emailAddress":"sungbin.na@lge.com"},
+    'labels' : ['Default_label'],
+    'duedate' : '2018-04-30',
+    #'customfield_10105' :[{"name":"sungbin.na","key":"sungbin.na","emailAddress":"sungbin.na@lge.com" },] #watchers
+    'customfield_10105' :[ {"name":"sungbin.na" }, {"name":"insun.song" }] #watchers
+}
 
-for row in excel_sheet.rows :
-    print(row[0].value)
-'''
-LEADSWETDI-122
+def makeKeyList() :
+    # read header and make key list to make jira json file
+    keylist = []
+    j = 1
+    cols = ws.columns
+    for col in cols :
+        val = ws.cell(row = 1, column = j).value
+        if(val is not None):
+            keylist.append(val)
+            j+=1
+        else :
+            pass
+    return keylist
+
+def setProject(keyword, value) :
+    print(keyword, " = ", value)
+    dissue_dict[keyword]['key'] = value
+
+def setComponents(keyword, value) :
+    print(keyword, " = ", value)
+    comp_list = value.split(',')
+    print(comp_list)
+    comp = { 'name' : ''}
+    for cl in comp_list :
+        comp['name'] = cl
+        dissue_dict[keyword].append(comp)
+        print(comp)
+    print(dissue_dict[keyword])
+
+def makeJSON(key, value) :
+    if (key == 'project') :
+        setProject(key, value)
+    elif (key == 'components'):
+        setComponents(key, value)
+    elif (key == 'issuetype'):
+        print("Set issuetype")
+        dissue_dict[key] = value
+    elif (key == 'parent'):
+        print("Set parent")
+    elif (key == 'summary'):
+        print("Set summary")
+    elif (key == 'description'):
+        print("Set description")
+    elif (key == 'Assignee'):
+        print("Set Assignee")
+    elif (key == 'Reporter'):
+        print("Set Reporter")
+    elif (key == 'watcher'):
+        print("Set watcher")
+    elif (key == 'duedate'):
+        print("Set duedate")
+    elif (key == 'labels'):
+        print("Set labels")
+    elif (key == 'comment'):
+        print("Set comment")
+    elif (key == 'attachment'):
+        print("Set attachment")
+    elif (key == 'Common Notice'):
+        print("Set Common Notice")
+    else :
+        print("[Error] Set default="+key)
+
+
 
 if __name__ == "__main__" :
+
+    # 엑셀파일 열기
+    excel_file = xlsrd.load_workbook('Jira_Issue.xlsm')
+    ws = excel_file['Dev Tracker']
+
+    jira_keylist = makeKeyList()
+    print(jira_keylist)
+
+    i = 1
+    j = 1
+    rows = ws.rows
+    for row in rows :
+        if(i == 1) : i+=1; j = 1; continue
+        for key in jira_keylist :
+            if(key == 'Key') :
+                j = 2; continue
+            val = ws.cell(row = i, column = j).value
+            #print("=====================")
+            #print(key, val)
+            #print("=====================")
+            makeJSON(key, val)
+            j += 1
+        i += 1
+
+    '''
+    cols = ws.columns
+    rows = ws.rows
+    i = j = 1
+    for row in rows :
+        j = 2
+        for col in cols :
+            makeJSON(ws.cell(row = i, column = j).value, ws.cell(row = i, column = j).value)
+            j+=1
+        i+=1
+    '''
+
+
+
+
+
+
+
+    '''
+    # 모든 row 접근
+    rows = ws.rows
+    for row in rows :
+        print(row[0].value)
+        print(row[1].value)
+        print(row[2].value)
+
+    # 모든 col 접근
+    cols = ws.columns
+    for col in cols :
+        print(col[0].value)
+        print(col[1].value)
+        print(col[2].value)
+    '''
+
+    '''
     dev_jira = JIRA(DevTracker, basic_auth = (userID, userPasswd))
     q_jira = JIRA(QTracker, basic_auth = (userID, userPasswd))
 
@@ -248,3 +376,4 @@ if __name__ == "__main__" :
     setFilter = 'Filter in (M3.LK61.EU.QA1, M3.LK61.EU.QA2, M3.LK61.EU.QA3, M3.LK61.EU.QA4)'
     qissue = q_jira.search_issues(setFilter)
     print("[QTracker] Get JIRA Issue with Specific Filter String: " + setFilter)
+    '''
