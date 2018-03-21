@@ -1,5 +1,6 @@
 import sys
 import os
+import copy
 
 #for Jira control
 from jira import JIRA
@@ -21,8 +22,9 @@ DevTracker = 'http://hlm.lge.com/issue'
 QTracker = 'http://hlm.lge.com/qi'
 
 userID = 'sungbin.na'
-userPasswd = 'Sungbin'
+userPasswd = 'Sungbin@1801'
 
+'''
 dissue_dict = {
     'project': {'key': 'GSWDIM'},
     'components' : [ ],
@@ -32,10 +34,50 @@ dissue_dict = {
     'issuetype' : { 'name' : 'Sub-task' },
     #'issuetype': {'id': '5'},
     'assignee': {"name":"sungbin.na", "emailAddress":"sungbin.na@lge.com"},
+    'reporter': {"name":"sungbin.na", "emailAddress":"sungbin.na@lge.com"},
     'labels' : ['Default_label'],
     'duedate' : '2018-04-30',
     #'customfield_10105' :[{"name":"sungbin.na","key":"sungbin.na","emailAddress":"sungbin.na@lge.com" },] #watchers
-    'customfield_10105' :[ {"name":"sungbin.na" }, {"name":"insun.song" }] #watchers
+    'customfield_10105' :[ {"name":"sungbin.na" }, {"name":"insun.song" }], #watchers
+    'comment' : { 'comments' : [ { 'body' : ''}, ] }, #comment
+}
+'''
+
+
+dissue_dict = {
+'''
+    'project': {'key': ''},
+    'components' : [ ],
+    'summary': '',
+    'description': '',
+    'parent' : { 'id' :  ''},
+    'issuetype' : { 'name' : '' },
+    #'issuetype': {'id': '5'},
+    'assignee': { },
+    'reporter': { },
+    'labels' : [ ],
+    'duedate' : '',
+    #'customfield_10105' :[{"name":"sungbin.na","key":"sungbin.na","emailAddress":"sungbin.na@lge.com" },] #watchers
+    'customfield_10105' :[ ], #watchers
+    'comment' : { 'comments' : [ { 'body' : ''}, ] }, #comment
+    '''
+}
+
+dissue_init_dict = {
+    'project': {'key': ''},
+    'components' : [ ],
+    'summary': '',
+    'description': '',
+    'parent' : { 'id' :  ''},
+    'issuetype' : { 'name' : '' },
+    #'issuetype': {'id': '5'},
+    'assignee': { },
+    'reporter': { },
+    'labels' : [ ],
+    'duedate' : '',
+    #'customfield_10105' :[{"name":"sungbin.na","key":"sungbin.na","emailAddress":"sungbin.na@lge.com" },] #watchers
+    'customfield_10105' :[ ], #watchers
+    #'comment' : { 'comments' : [ { 'body' : ''}, ] }, #comment
 }
 
 def makeKeyList() :
@@ -53,57 +95,152 @@ def makeKeyList() :
     return keylist
 
 def setProject(keyword, value) :
-    print(keyword, " = ", value)
-    dissue_dict[keyword]['key'] = value
+    if(value is not None):
+        print(keyword, " = ", value)
+        dissue_dict[keyword]['key'] = value
+    else :
+        print(keyword, " = None... Skip")
+
 
 def setComponents(keyword, value) :
-    print(keyword, " = ", value)
-    comp_list = value.split(',')
-    print(comp_list)
-    comp = { 'name' : ''}
-    for cl in comp_list :
-        comp['name'] = cl
-        dissue_dict[keyword].append(comp)
-        print(comp)
-    print(dissue_dict[keyword])
+    if(value is not None):
+        print(keyword, " = ", value)
+        comp_list = value.split(',')
+        print(comp_list)
+        comp_dict = { 'name' : ''}
+        for cl in comp_list :
+            comp_dict['name'] = cl.strip()
+            dissue_dict[keyword].append(comp_dict)
+            #print(comp)
+        #print(dissue_dict[keyword])
+    else :
+        print(keyword, " = None... Skip")
 
-def makeJSON(key, value) :
+
+def setIssueType(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+        dissue_dict[keyword]['name'] = value.strip()
+    else :
+        print(keyword, " = None... Skip")
+
+def setParent(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+        dissue_dict[keyword]['id'] = value
+    else :
+        del dissue_dict[keyword]
+        print(keyword, " = None... Skip")
+
+def setSummarynDescription(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+        dissue_dict[keyword] = value.strip()
+    else :
+        print(keyword, " = None... Skip")
+
+def setAssigneenReporter(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+        dissue_dict[keyword]['name'] = value.strip()
+    else :
+        print(keyword, " = None... Skip")
+
+def setWatchers(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+        watcher_list = value.split(',')
+        #print(watcher_list)
+        for watcher in watcher_list :
+            watcher_dict = { 'name' : ''}
+            watcher_dict['name'] = watcher.strip() # delete space
+            dissue_dict['customfield_10105'].append(watcher_dict)
+            print("========================")
+            print(watcher.strip())
+    else :
+        print(keyword, " = None... Skip")
+
+def setDuedate(keyword, value) :
+    if(value is not None):
+        #duedate = datetime.strptime(value, '%Y-%m-%d')
+        print(keyword, " = ", value)
+        dissue_dict[keyword] = str(value)
+    else :
+        print(keyword, " = None... Skip")
+
+def setLabels(keyword, value) :
+    if(value is not None):
+        label_list = value.split(',')
+        print(label_list)
+        for label in label_list :
+            dissue_dict[keyword].append(label)
+    else :
+        print(keyword, " = None... Skip")
+
+def setComment(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+        #dissue_dict['comment']['comments']['0']['body'] = value
+        #'comment' : { 'comments' : [ { 'body' : ''}, ] }, #comment
+    else :
+        print(keyword, " = None... Skip")
+
+def setAttachment(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+    else :
+        print(keyword, " = None... Skip")
+
+def setCommonNotice(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+        desc = dissue_dict['description']
+        desc = str(desc) + str(value)
+        dissue_dict['description'] = desc
+        #print("========================")
+        #print(dissue_dict['description'])
+        #print("========================")
+    else :
+        print(keyword, " = None... Skip")
+
+
+
+def makeDevJiraJSON(key, value) :
     if (key == 'project') :
         setProject(key, value)
     elif (key == 'components'):
         setComponents(key, value)
     elif (key == 'issuetype'):
-        print("Set issuetype")
-        dissue_dict[key] = value
+        print(key + ' = ' + value)
+        setIssueType(key, value)
     elif (key == 'parent'):
-        print("Set parent")
+        setParent(key, value)
     elif (key == 'summary'):
-        print("Set summary")
+        setSummarynDescription(key, value)
     elif (key == 'description'):
-        print("Set description")
-    elif (key == 'Assignee'):
-        print("Set Assignee")
-    elif (key == 'Reporter'):
-        print("Set Reporter")
+        setSummarynDescription(key, value)
+    elif (key == 'assignee'):
+        setAssigneenReporter(key, value)
+    elif (key == 'reporter'):
+        setAssigneenReporter(key, value)
     elif (key == 'watcher'):
-        print("Set watcher")
+        setWatchers(key, value)
     elif (key == 'duedate'):
-        print("Set duedate")
+        setDuedate(key, value)
     elif (key == 'labels'):
-        print("Set labels")
+        setLabels(key, value)
     elif (key == 'comment'):
-        print("Set comment")
+        setComment(key, value)
     elif (key == 'attachment'):
         print("Set attachment")
     elif (key == 'Common Notice'):
-        print("Set Common Notice")
+        setCommonNotice(key, value)
     else :
         print("[Error] Set default="+key)
 
 
 
 if __name__ == "__main__" :
-
     # 엑셀파일 열기
     excel_file = xlsrd.load_workbook('Jira_Issue.xlsm')
     ws = excel_file['Dev Tracker']
@@ -111,36 +248,40 @@ if __name__ == "__main__" :
     jira_keylist = makeKeyList()
     print(jira_keylist)
 
-    i = 1
-    j = 1
+    dev_jira = JIRA(DevTracker, basic_auth = (userID, userPasswd))
+    q_jira = JIRA(QTracker, basic_auth = (userID, userPasswd))
+
+
+    i = 1; j = 1
     rows = ws.rows
     for row in rows :
         if(i == 1) : i+=1; j = 1; continue
+        dissue_dict = copy.deepcopy(dissue_init_dict)
         for key in jira_keylist :
             if(key == 'Key') :
                 j = 2; continue
-            val = ws.cell(row = i, column = j).value
+            if(key == 'Common Notice') :
+                val = ws.cell(row = 2, column = j).value
+            else :
+                val = ws.cell(row = i, column = j).value
             #print("=====================")
             #print(key, val)
             #print("=====================")
-            makeJSON(key, val)
+            makeDevJiraJSON(key, val)
             j += 1
+        try :
+            print("========================================================")
+            print(dissue_dict)
+            new_dissue = dev_jira.create_issue(fields=dissue_dict)
+            createdkey = new_dissue.raw['key']
+            print("Created Key = ", createdkey)
+            ws.cell(row = i, column = 1).value = createdkey
+            print("========================================================")
+        except Exception as e:
+            print(e)
         i += 1
 
-    '''
-    cols = ws.columns
-    rows = ws.rows
-    i = j = 1
-    for row in rows :
-        j = 2
-        for col in cols :
-            makeJSON(ws.cell(row = i, column = j).value, ws.cell(row = i, column = j).value)
-            j+=1
-        i+=1
-    '''
-
-
-
+        #excel_file.save('Jira_Issue.xlsm')
 
 
 
