@@ -21,7 +21,7 @@ DevTracker = 'http://hlm.lge.com/issue'
 QTracker = 'http://hlm.lge.com/qi'
 
 userID = 'sungbin.na'
-userPasswd = 'Sungbin@1801'
+userPasswd = 'Sungbin'
 
 '''
 dissue_dict = {
