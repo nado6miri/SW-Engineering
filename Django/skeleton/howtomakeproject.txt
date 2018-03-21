@@ -5,9 +5,23 @@
 3. vartualenv dev_env
 4. cd dev_env
 5. Script/activate - 가상환경 설정
+
+django-admin startproject projectname . // project 생성
 #==============================
-django-admin startproject projectname // project 생성
-python manage.py start polls          // polls application 생성
-python manage.py migrate              // Database 변경사항 생성
-python manage.py createsuperuser      // Super User 관리자 메뉴 생성
-python manage.py runserver            // 웹 서버 실행
+# Project 생성 및 Default 확인
+#==============================
+python manage.py start polls            // polls application 생성
+python manage.py migrate                // Database 변경사항 생성
+python manage.py createsuperuser        // Super User 관리자 메뉴 생성
+python manage.py runserver              // 웹 서버 실행
+
+
+#==============================
+# Application 개발 - Model 코딩
+#==============================
+vi settings                             // Project 설정파일에 Database를 지정함.
+vi models.py                            // DataBase Table을 정의함.
+vi admin.py                             // 정의된 Table을 Admin 화면에 보이게 함.
+python manage.py makemigrations         // Database 변경이 필요한 사항을 추출함
+python manage.py migrate                // Database에 변경사항을 반영함.
+python manage.py runserver              // 웹 서버 실행 및 확인

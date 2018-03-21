@@ -9,8 +9,7 @@ import xlsxwriter as xlswt
 import openpyxl as xlsrd
 #for time
 from datetime import datetime
-# for UI
-from PyQt5 import uic, QtWidgets, QtGui
+
 
 #http://hlm.lge.com/issue/rest/api/2/issue/GSWDIM-22476/
 #http://hlm.lge.com/issue/rest/api/2/issue/TVPLAT-3963/
@@ -44,25 +43,7 @@ dissue_dict = {
 '''
 
 
-dissue_dict = {
-'''
-    'project': {'key': ''},
-    'components' : [ ],
-    'summary': '',
-    'description': '',
-    'parent' : { 'id' :  ''},
-    'issuetype' : { 'name' : '' },
-    #'issuetype': {'id': '5'},
-    'assignee': { },
-    'reporter': { },
-    'labels' : [ ],
-    'duedate' : '',
-    #'customfield_10105' :[{"name":"sungbin.na","key":"sungbin.na","emailAddress":"sungbin.na@lge.com" },] #watchers
-    'customfield_10105' :[ ], #watchers
-    'comment' : { 'comments' : [ { 'body' : ''}, ] }, #comment
-    '''
-}
-
+dissue_dict = { }
 dissue_init_dict = {
     'project': {'key': ''},
     'components' : [ ],

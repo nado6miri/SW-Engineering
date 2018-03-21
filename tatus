@@ -1,0 +1,41 @@
+[33mcommit 68440d845114d908685a83169f274acd333383f6[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: nado6miri <nado6miri@gmail.com>
+Date:   Thu Mar 8 21:38:17 2018 +0900
+
+    conversion python2 to python3
+
+[33mcommit 36bdbc46a7c4e2d1dfa9adedef0d466da53268b8[m
+Author: nado6miri <nado6miri@gmail.com>
+Date:   Wed Mar 7 23:21:42 2018 +0900
+
+    conversion python2 to python3
+
+[33mcommit e860aac292bf5fc7336b338e66f65cfce2727976[m
+Author: nado6miri <nado6miri@gmail.com>
+Date:   Wed Mar 7 22:21:48 2018 +0900
+
+    fix p number
+
+[33mcommit b6175becdd7cc1031fed3ac3c4b093bf7c926695[m
+Author: nado6miri <nado6miri@gmail.com>
+Date:   Wed Mar 7 22:17:51 2018 +0900
+
+    add Django example
+
+[33mcommit a2427860b9081e8e212dbb7ae8e29637b95fd292[m
+Author: 나성빈/책임연구원/TV선행SW Engineering팀(sungbin.na@lge.com) <sungbin.na@lge.com>
+Date:   Wed Mar 7 11:15:51 2018 +0900
+
+    HLM Jira control
+
+[33mcommit cd2576ba775410975b4ed00258c47401dc666812[m
+Author: nado6miri <nado6miri@gmail.com>
+Date:   Tue Mar 6 21:53:06 2018 +0900
+
+    Fix auth number
+
+[33mcommit d7973409757975faac94baeae6dc3428015c5ee3[m
+Author: sungbin <nado6miri@gmail.com>
+Date:   Tue Mar 6 21:33:15 2018 +0900
+
+    first commmit
