@@ -91,6 +91,7 @@ def setComponents(keyword, value) :
             #print(comp)
         #print(dissue_dict[keyword])
     else :
+        del dissue_dict[keyword]
         print(keyword, " = None... Skip")
 
 
@@ -132,9 +133,10 @@ def setWatchers(keyword, value) :
             watcher_dict = { 'name' : ''}
             watcher_dict['name'] = watcher.strip() # delete space
             dissue_dict['customfield_10105'].append(watcher_dict)
-            print("========================")
-            print(watcher.strip())
+            #print("========================")
+            #print(watcher.strip())
     else :
+        del dissue_dict[keyword]
         print(keyword, " = None... Skip")
 
 def setDuedate(keyword, value) :
@@ -143,6 +145,7 @@ def setDuedate(keyword, value) :
         print(keyword, " = ", value)
         dissue_dict[keyword] = str(value)
     else :
+        del dissue_dict[keyword]
         print(keyword, " = None... Skip")
 
 def setLabels(keyword, value) :
@@ -152,6 +155,7 @@ def setLabels(keyword, value) :
         for label in label_list :
             dissue_dict[keyword].append(label)
     else :
+        del dissue_dict[keyword]
         print(keyword, " = None... Skip")
 
 def setComment(keyword, value) :
@@ -172,7 +176,7 @@ def setCommonNotice(keyword, value) :
     if(value is not None):
         print(keyword, " = ", value)
         desc = dissue_dict['description']
-        desc = str(desc) + str(value)
+        desc = str(desc) + '\\n\\n' + str(value)
         dissue_dict['description'] = desc
         #print("========================")
         #print(dissue_dict['description'])
@@ -221,9 +225,9 @@ form_class = uic.loadUiType("./QtUI/MainDialog.ui")[0];
 class MyWindow(QMainWindow, form_class) :
     def __init__(self):
         super().__init__();
-        self.setWindowTitle("Auto Jira Creator");
         self.setupUi(self);
 
+        self.setWindowTitle("DevTracker Jira Creator from Excel");
         self.Path.setText("Please select Excel file..........")
         self.Path.setReadOnly(True)
 
@@ -240,7 +244,7 @@ class MyWindow(QMainWindow, form_class) :
         self.CreateBtn.clicked.connect(self.createJiraIssue)
         self.ExitBtn.clicked.connect(appexit)
         self.FileSelectionBtn.clicked.connect(self.openFileNameDialog)
-        self.SaveInfo.clicked.connect(self.SaveInfoClicked)
+        #self.SaveInfo.clicked.connect(self.SaveInfoClicked)
 
 
     def userLogin(self) :
@@ -301,10 +305,10 @@ class MyWindow(QMainWindow, form_class) :
         fileName, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","All Files (*);;Text Files (*.xlsm)", options=options)
         if fileName:
             print(fileName)
-    '''
 
     def SaveInfoClicked(self) :
     	print("SaveInfoClicked")
+    '''
 
     def createJiraIssue(self) :
         print("createJiraIssue")
