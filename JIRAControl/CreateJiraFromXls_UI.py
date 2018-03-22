@@ -4,6 +4,8 @@ import copy
 
 #for Jira control
 from jira import JIRA
+from jira.exceptions import JIRAError
+
 #for excel control
 import xlsxwriter as xlswt
 import openpyxl as xlsrd
@@ -26,8 +28,12 @@ DevTracker = 'http://hlm.lge.com/issue'
 QTracker = 'http://hlm.lge.com/qi'
 
 
-userID = 'sungbin.na'
-userPasswd = 'Sungbin'
+# Excel
+excel_file = None
+wsheet = None
+# Jira
+dev_jira = False
+q_jira = False
 
 dissue_dict = {}
 dissue_init_dict = {
@@ -46,6 +52,9 @@ dissue_init_dict = {
     'customfield_10105' :[ ], #watchers
     #'comment' : { 'comments' : [ { 'body' : ''}, ] }, #comment
 }
+
+Islogin = False
+Isexcelloaded = False
 
 
 def makeKeyList(ws) :
@@ -172,7 +181,6 @@ def setCommonNotice(keyword, value) :
         print(keyword, " = None... Skip")
 
 
-
 def makeDevJiraJSON(key, value) :
     if (key == 'project') :
         setProject(key, value)
@@ -207,104 +215,145 @@ def makeDevJiraJSON(key, value) :
         print("[Error] Set default="+key)
 
 
-def userLogin() :
-	print("userLogin")
-	'''
-    dev_jira = JIRA(DevTracker, basic_auth = (userID, userPasswd))
-    q_jira = JIRA(QTracker, basic_auth = (userID, userPasswd))
-	'''
-
-def loadExcelfile() :
-	print("loadExcelfile")
-
-
-def createJiraIssue() :
-	print("createJiraIssue")
-	'''
-    i = 1; j = 1
-    rows = ws.rows
-    for row in rows :
-        if(i == 1) : i+=1; j = 1; continue
-        dissue_dict = copy.deepcopy(dissue_init_dict)
-        for key in jira_keylist :
-            if(key == 'Key') :
-                j = 2; continue
-            if(key == 'Common Notice') :
-                val = ws.cell(row = 2, column = j).value
-            else :
-                val = ws.cell(row = i, column = j).value
-            #print("=====================")
-            #print(key, val)
-            #print("=====================")
-            makeDevJiraJSON(key, val)
-            j += 1
-        try :
-            print("========================================================")
-            print(dissue_dict)
-            new_dissue = dev_jira.create_issue(fields=dissue_dict)
-            createdkey = new_dissue.raw['key']
-            print("Created Key = ", createdkey)
-            ws.cell(row = i, column = 1).value = createdkey
-            print("========================================================")
-        except Exception as e:
-            print(e)
-        i += 1
-	'''
-
-def appexit() :
-	print("appexit")
-
-def SaveInfoClicked() :
-	print("SaveInfoClicked")
-
-
 form_class = uic.loadUiType("./QtUI/MainDialog.ui")[0];
 
 #class MyWindow(QMainWindow):
 class MyWindow(QMainWindow, form_class) :
-	def __init__(self):
-		super().__init__();
-		self.setWindowTitle("Auto Jira Creator");
-		self.setupUi(self);
+    def __init__(self):
+        super().__init__();
+        self.setWindowTitle("Auto Jira Creator");
+        self.setupUi(self);
 
-		self.Path.setText("Please select Excel file..........")
-		self.ProgressBar.setMinimum(0)
-		self.ProgressBar.setMaximum(100)
-		self.ProgressBar.setValue(100)
+        self.Path.setText("Please select Excel file..........")
+        self.Path.setReadOnly(True)
 
-		#self.myEOSCnt.textChanged.connect(self.setMyEOSCnt);
-		self.LoginBtn.clicked.connect(userLogin)
-		self.CreateBtn.clicked.connect(createJiraIssue)
-		self.ExitBtn.clicked.connect(appexit)
-		self.FileSelectionBtn.clicked.connect(self.openFileNameDialog)
-		self.SaveInfo.clicked.connect(SaveInfoClicked)
+        self.ProgressBar.setMinimum(0)
+        self.ProgressBar.setMaximum(100)
+        self.ProgressBar.setValue(0)
 
-	def openFileNameDialog(self):
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","Exel Files (*.xlsm);;Exel Files (*.xls)", options=options)
-		if fileName:
-			self.Path.setText(fileName)
-			excel_file = xlsrd.load_workbook(fileName)
-			ws = excel_file['Dev Tracker']
-			jira_keylist = makeKeyList(ws)
-			print("==========================================")
-			print(jira_keylist)
-			print("==========================================")
+        self.FileSelectionBtn.setEnabled(False)
+        self.CreateBtn.setEnabled(False)
 
-	def openFileNamesDialog(self):
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		files, _ = QFileDialog.getOpenFileNames(self,"QFileDialog.getOpenFileNames()", "","All Files (*);;Python Files (*.xlsm)", options=options)
-		if files:
-		    print(files)
+        self.UserID.setFocus()
 
-	def saveFileDialog(self):
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		fileName, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","All Files (*);;Text Files (*.xlsm)", options=options)
-		if fileName:
-		    print(fileName)
+        self.LoginBtn.clicked.connect(self.userLogin)
+        self.CreateBtn.clicked.connect(self.createJiraIssue)
+        self.ExitBtn.clicked.connect(appexit)
+        self.FileSelectionBtn.clicked.connect(self.openFileNameDialog)
+        self.SaveInfo.clicked.connect(self.SaveInfoClicked)
+
+
+    def userLogin(self) :
+        global dev_jira
+        print("userLogin")
+        self.userID = self.UserID.text()
+        self.userPasswd = self.Passwd.text()
+        try :
+            dev_jira = JIRA(DevTracker, basic_auth = ('sungbin.na', 'Sungbin@1801'))
+            #q_jira = JIRA(QTracker, basic_auth = (userID, userPasswd))
+            #dev_jira = JIRA(DevTracker, basic_auth = (userID, userPasswd))
+            #q_jira = JIRA(QTracker, basic_auth = (userID, userPasswd))
+        except JIRAError as e:
+            if e.status_code == 401 :
+                print("[Error] Login Fail.. Please Check ID/Passwd and Try again!")
+            print(e)
+        else :
+            Islogin = True
+            self.FileSelectionBtn.setEnabled(True)
+            self.CreateBtn.setEnabled(False)
+            print("userLogin=", Islogin)
+        finally :
+            print("Login Try/Exception routine is passed!")
+            pass
+
+
+    def openFileNameDialog(self):
+        global wsheet
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","Exel Files (*.xlsm);;Exel Files (*.xls)", options=options)
+        if fileName:
+            self.Path.setText(fileName)
+            excel_file = xlsrd.load_workbook(fileName)
+            wsheet = excel_file['Dev Tracker']
+            Isexcelloaded = True
+            self.FileSelectionBtn.setEnabled(True)
+            self.CreateBtn.setEnabled(True)
+            self.ProgressBar.setValue(0)
+
+            #print("==========================================")
+            #print(jira_keylist)
+            #print("==========================================")
+        else :
+            Isexcelloaded = False
+            self.CreateBtn.setEnabled(False)
+
+    '''
+    def openFileNamesDialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        files, _ = QFileDialog.getOpenFileNames(self,"QFileDialog.getOpenFileNames()", "","All Files (*);;Python Files (*.xlsm)", options=options)
+        if files:
+            print(files)
+
+    def saveFileDialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","All Files (*);;Text Files (*.xlsm)", options=options)
+        if fileName:
+            print(fileName)
+    '''
+
+    def SaveInfoClicked(self) :
+    	print("SaveInfoClicked")
+
+    def createJiraIssue(self) :
+        print("createJiraIssue")
+        global dissue_dict
+        global dev_jira
+        global q_jira
+
+        self.ProgressBar.setValue(0)
+        i = 1; j = 1
+        rows = wsheet.rows
+        jira_keylist = makeKeyList(wsheet)
+
+        for row in rows :
+            if(i == 1) : i+=1; j = 1; continue
+            dissue_dict = copy.deepcopy(dissue_init_dict)
+            for key in jira_keylist :
+                if(key == 'Key') :
+                    j = 2; continue
+                if(key == 'Common Notice') :
+                    val = wsheet.cell(row = 2, column = j).value
+                else :
+                    val = wsheet.cell(row = i, column = j).value
+                #print("=====================")
+                #print(key, val)
+                #print("=====================")
+                makeDevJiraJSON(key, val)
+                j += 1
+            try :
+                print("========================================================")
+                print(dissue_dict)
+                new_dissue = dev_jira.create_issue(fields= dissue_dict)
+                #createdkey = new_dissue.raw['key']
+                #print("Created Key = ", createdkey)
+                #wsheet.cell(row = i, column = 1).value = createdkey
+                print("========================================================")
+            except Exception as e:
+                print(e)
+            row_count = wsheet.max_row
+            progressing = int(i*100/row_count)
+            self.ProgressBar.setValue(progressing)
+            self.ProgressBar.update()
+            #column_count = wsheet.max_column
+            i += 1
+
+
+def appexit() :
+    print("appexit")
+    sys.exit()
 
 
 if __name__ == "__main__" :
