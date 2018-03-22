@@ -245,14 +245,13 @@ class MyWindow(QMainWindow, form_class) :
 
     def userLogin(self) :
         global dev_jira
+        global q_jira
         print("userLogin")
-        self.userID = self.UserID.text()
-        self.userPasswd = self.Passwd.text()
+        userID = self.UserID.text()
+        userPasswd = self.Passwd.text()
         try :
-            dev_jira = JIRA(DevTracker, basic_auth = ('sungbin.na', 'Sungbin@1801'))
-            #q_jira = JIRA(QTracker, basic_auth = (userID, userPasswd))
-            #dev_jira = JIRA(DevTracker, basic_auth = (userID, userPasswd))
-            #q_jira = JIRA(QTracker, basic_auth = (userID, userPasswd))
+            dev_jira = JIRA(DevTracker, basic_auth = (userID, userPasswd))
+            q_jira = JIRA(QTracker, basic_auth = (userID, userPasswd))
         except JIRAError as e:
             if e.status_code == 401 :
                 print("[Error] Login Fail.. Please Check ID/Passwd and Try again!")
