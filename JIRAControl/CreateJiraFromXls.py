@@ -1,15 +1,21 @@
 import sys
 import os
 import copy
+import time
 
 #for Jira control
 from jira import JIRA
+from jira.exceptions import JIRAError
+
 #for excel control
 import xlsxwriter as xlswt
 import openpyxl as xlsrd
 #for time
 from datetime import datetime
 
+# dir(jira)
+# dir(jira.JIRA)
+# hasattr(JIRA, crete_issue)
 
 #http://hlm.lge.com/issue/rest/api/2/issue/GSWDIM-22476/
 #http://hlm.lge.com/issue/rest/api/2/issue/TVPLAT-3963/
@@ -58,6 +64,7 @@ dissue_init_dict = {
     'duedate' : '',
     #'customfield_10105' :[{"name":"sungbin.na","key":"sungbin.na","emailAddress":"sungbin.na@lge.com" },] #watchers
     'customfield_10105' :[ ], #watchers
+    'customfield_10436':'', # Epic Name
     #'comment' : { 'comments' : [ { 'body' : ''}, ] }, #comment
 }
 
@@ -85,6 +92,7 @@ def setProject(keyword, value) :
 
 def setComponents(keyword, value) :
     if(value is not None):
+        value = str(value)
         print(keyword, " = ", value)
         comp_list = value.split(',')
         print(comp_list)
@@ -95,6 +103,7 @@ def setComponents(keyword, value) :
             #print(comp)
         #print(dissue_dict[keyword])
     else :
+        del dissue_dict[keyword]
         print(keyword, " = None... Skip")
 
 
@@ -103,29 +112,64 @@ def setIssueType(keyword, value) :
         print(keyword, " = ", value)
         dissue_dict[keyword]['name'] = value.strip()
     else :
-        print(keyword, " = None... Skip")
+        dissue_dict[keyword]['name'] = 'Task'
+        print(keyword, " = None... Set Default - Task")
 
 def setParent(keyword, value) :
     if(value is not None):
-        print(keyword, " = ", value)
-        dissue_dict[keyword]['id'] = value
+        if(dissue_dict['issuetype']['name'] == 'Sub-task') :
+            print(keyword, " = ", value)
+            dissue_dict[keyword]['id'] = value
+        else :
+            del dissue_dict[keyword]
+            print("Issue type is not Sub-Task.... No need to set parent id... delete this keyword")
     else :
-        del dissue_dict[keyword]
-        print(keyword, " = None... Skip")
+        if(dissue_dict['issuetype']['name'] == 'Sub-Task') :
+            print("[Err] Issue type is Sub-Task.... Need to set parent id...")
+        else :
+            del dissue_dict[keyword]
+            print(keyword, " = Issue type is not Sub-Task, No need to set parent id... delete this keyword")
+
+def setEpicName(keyword, value) :
+    if(value is not None):
+        print("************************")
+        print(keyword, " = ", value)
+        if(dissue_dict['issuetype']['name'] == 'Epic') :
+            dissue_dict['customfield_10436'] = value
+        else :
+            del dissue_dict['customfield_10436']
+            print("Issue type is not Epic.... No need to set Epic Name... delete this keyword")
+    else :
+        if(dissue_dict['issuetype']['name'] == 'Epic') :
+            print("[Err] Issue type is Epic.... Need to set Epic Name...")
+        else :
+            del dissue_dict['customfield_10436']
+            print(keyword, " = Issue type is not Epic, No need to set Epic Name... delete this keyword")
+
 
 def setSummarynDescription(keyword, value) :
     if(value is not None):
         print(keyword, " = ", value)
         dissue_dict[keyword] = value.strip()
     else :
-        print(keyword, " = None... Skip")
+        if(keyword == 'summary') :
+            dissue_dict[keyword] = 'Set Default Summary - Please change the summary later'
+        elif (keyword == 'description') :
+            dissue_dict[keyword] = 'Set Default Description - Please change the Description later'
+        else :
+            print(keyword, " = None... Skip")
 
 def setAssigneenReporter(keyword, value) :
     if(value is not None):
         print(keyword, " = ", value)
         dissue_dict[keyword]['name'] = value.strip()
     else :
-        print(keyword, " = None... Skip")
+        if(keyword == 'assignee') :
+            dissue_dict[keyword]['name'] = None
+        elif (keyword == 'reporter') :
+            dissue_dict[keyword]['name'] = 'hlm-admin'
+        else :
+            print(keyword, " = None... Skip")
 
 def setWatchers(keyword, value) :
     if(value is not None):
@@ -136,9 +180,10 @@ def setWatchers(keyword, value) :
             watcher_dict = { 'name' : ''}
             watcher_dict['name'] = watcher.strip() # delete space
             dissue_dict['customfield_10105'].append(watcher_dict)
-            print("========================")
-            print(watcher.strip())
+            #print("========================")
+            #print(watcher.strip())
     else :
+        del dissue_dict['customfield_10105']
         print(keyword, " = None... Skip")
 
 def setDuedate(keyword, value) :
@@ -147,6 +192,7 @@ def setDuedate(keyword, value) :
         print(keyword, " = ", value)
         dissue_dict[keyword] = str(value)
     else :
+        del dissue_dict[keyword]
         print(keyword, " = None... Skip")
 
 def setLabels(keyword, value) :
@@ -156,6 +202,7 @@ def setLabels(keyword, value) :
         for label in label_list :
             dissue_dict[keyword].append(label)
     else :
+        del dissue_dict[keyword]
         print(keyword, " = None... Skip")
 
 def setComment(keyword, value) :
@@ -176,14 +223,13 @@ def setCommonNotice(keyword, value) :
     if(value is not None):
         print(keyword, " = ", value)
         desc = dissue_dict['description']
-        desc = str(desc) + str(value)
+        desc = str(desc) + '\\n\\n' + str(value)
         dissue_dict['description'] = desc
         #print("========================")
         #print(dissue_dict['description'])
         #print("========================")
     else :
         print(keyword, " = None... Skip")
-
 
 
 def makeDevJiraJSON(key, value) :
@@ -196,6 +242,8 @@ def makeDevJiraJSON(key, value) :
         setIssueType(key, value)
     elif (key == 'parent'):
         setParent(key, value)
+    elif (key == 'Epic Name'):
+        setEpicName(key, value)
     elif (key == 'summary'):
         setSummarynDescription(key, value)
     elif (key == 'description'):
@@ -217,7 +265,7 @@ def makeDevJiraJSON(key, value) :
     elif (key == 'Common Notice'):
         setCommonNotice(key, value)
     else :
-        print("[Error] Set default="+key)
+        print("[Skip] Column - Unregistered key or field = ", key)
 
 
 

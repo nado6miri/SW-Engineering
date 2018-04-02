@@ -56,8 +56,12 @@ dissue_init_dict = {
     'duedate' : '',
     #'customfield_10105' :[{"name":"sungbin.na","key":"sungbin.na","emailAddress":"sungbin.na@lge.com" },] #watchers
     'customfield_10105' :[ ], #watchers
-    'customfield_10436':'', # Epic Name
-    #'comment' : { 'comments' : [ { 'body' : ''}, ] }, #comment
+    'customfield_10436' :'', # Epic Name
+    # for checklist
+    'customfield_17304' : '' , # SW개발단계
+    'customfield_17305' : '' , # 단계별 세부 영역
+    'customfield_17306' : '' , # 체크리스트
+    'customfield_17307' : '' , # 점검 대상 산출물
 }
 
 Islogin = False
@@ -228,6 +232,48 @@ def setCommonNotice(keyword, value) :
         print(keyword, " = None... Skip")
 
 
+#'customfield_17304' :  , # SW개발단계
+def setSWDevStep(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+        if(dissue_dict['issuetype']['name'] != 'Initiative'):
+            dissue_dict['customfield_17304'] = value
+        else :
+            del dissue_dict['customfield_17304']
+            print(keyword, " = None... Skip")
+    else :
+        del dissue_dict['customfield_17304']
+        print(keyword, " = None... Skip")
+
+#'customfield_17305' :  , # 단계별 세부 영역
+def setSWDevStepDetailRange(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+        dissue_dict['customfield_17305'] = value
+    else :
+        del dissue_dict['customfield_17305']
+        print(keyword, " = None... Skip")
+
+#'customfield_17306' :  , # 체크리스트
+def setSWDevCheckList(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+        dissue_dict['customfield_17306'] = value
+    else :
+        del dissue_dict['customfield_17306']
+        print(keyword, " = None... Skip")
+
+#'customfield_17307' :  , # 점검 대상 산출물
+def setSWDevOutput(keyword, value) :
+    if(value is not None):
+        print(keyword, " = ", value)
+        dissue_dict['customfield_17307'] = value
+    else :
+        del dissue_dict['customfield_17307']
+        print(keyword, " = None... Skip")
+
+
+
 def makeDevJiraJSON(key, value) :
     if (key == 'project') :
         setProject(key, value)
@@ -260,6 +306,15 @@ def makeDevJiraJSON(key, value) :
         print("Set attachment")
     elif (key == 'Common Notice'):
         setCommonNotice(key, value)
+    #for SW audit - checklist - customfield....
+    elif (key == 'SW개발단계'):
+        setSWDevStep(key, value)
+    elif (key == '단계별 세부 영역'):
+        setSWDevStepDetailRange(key, value)
+    elif (key == '체크리스트'):
+        setSWDevCheckList(key, value)
+    elif (key == '점검 대상 산출물'):
+        setSWDevOutput(key, value)
     else :
         print("[Skip] Column - Unregistered key or field = ", key)
 
@@ -376,17 +431,15 @@ class MyWindow(QMainWindow, form_class) :
 
         log = open('logfile.txt', 'wt')
 
-		'''
         update_dict = {
             'customfield_10105' :[ {"name":"" },], #watchers
         }
-		'''
         for row in rows :
             if(i == 1) : i+=1; j = 1; continue
 
             if(wsheet.cell(row = i, column = 2).value) : # if project is not null - create issue
                 dissue_dict = copy.deepcopy(dissue_init_dict)
-                msg = "\n######## Row = %d��° Issue ���� ���� �մϴ�. #######\n" % i
+                msg = "\n######## Row = %d번째 Issue 생성 시작 합니다. #######\n" % i
                 print(msg)
                 log.write(msg)
 
@@ -418,7 +471,7 @@ class MyWindow(QMainWindow, form_class) :
                     print(e)
 
             else :
-                msg = "\nRow = %d��° Issue ���� Skip �մϴ�.\n" % i
+                msg = "\nRow = %d번째 Issue 생성 Skip 합니다.\n" % i
                 print(msg)
                 log.write(msg)
                 pass
