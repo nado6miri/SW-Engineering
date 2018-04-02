@@ -1,6 +1,7 @@
 import sys
 import os
 import copy
+import time
 
 #for Jira control
 from jira import JIRA
@@ -50,6 +51,7 @@ dissue_init_dict = {
     'duedate' : '',
     #'customfield_10105' :[{"name":"sungbin.na","key":"sungbin.na","emailAddress":"sungbin.na@lge.com" },] #watchers
     'customfield_10105' :[ ], #watchers
+    'customfield_10436':'', # Epic Name
     #'comment' : { 'comments' : [ { 'body' : ''}, ] }, #comment
 }
 
@@ -100,29 +102,64 @@ def setIssueType(keyword, value) :
         print(keyword, " = ", value)
         dissue_dict[keyword]['name'] = value.strip()
     else :
-        print(keyword, " = None... Skip")
+        dissue_dict[keyword]['name'] = 'Task'
+        print(keyword, " = None... Set Default - Task")
 
 def setParent(keyword, value) :
     if(value is not None):
-        print(keyword, " = ", value)
-        dissue_dict[keyword]['id'] = value
+        if(dissue_dict['issuetype']['name'] == 'Sub-Task') :
+            print(keyword, " = ", value)
+            dissue_dict[keyword]['id'] = value
+        else :
+            del dissue_dict[keyword]
+            print("Issue type is not Sub-Task.... No need to set parent id... delete this keyword")
     else :
-        del dissue_dict[keyword]
-        print(keyword, " = None... Skip")
+        if(dissue_dict['issuetype']['name'] == 'Sub-Task') :
+            print("[Err] Issue type is Sub-Task.... Need to set parent id...")
+        else :
+            del dissue_dict[keyword]
+            print(keyword, " = Issue type is not Sub-Task, No need to set parent id... delete this keyword")
+
+def setEpicName(keyword, value) :
+    if(value is not None):
+        print("************************")
+        print(keyword, " = ", value)
+        if(dissue_dict['issuetype']['name'] == 'Epic') :
+            dissue_dict['customfield_10436'] = value
+        else :
+            del dissue_dict['customfield_10436']
+            print("Issue type is not Epic.... No need to set Epic Name... delete this keyword")
+    else :
+        if(dissue_dict['issuetype']['name'] == 'Epic') :
+            print("[Err] Issue type is Epic.... Need to set Epic Name...")
+        else :
+            del dissue_dict['customfield_10436']
+            print(keyword, " = Issue type is not Epic, No need to set Epic Name... delete this keyword")
+
 
 def setSummarynDescription(keyword, value) :
     if(value is not None):
         print(keyword, " = ", value)
         dissue_dict[keyword] = value.strip()
     else :
-        print(keyword, " = None... Skip")
+        if(keyword == 'summary') :
+            dissue_dict[keyword] = 'Set Default Summary - Please change the summary later'
+        elif (keyword == 'description') :
+            dissue_dict[keyword] = 'Set Default Description - Please change the Description later'
+        else :
+            print(keyword, " = None... Skip")
 
 def setAssigneenReporter(keyword, value) :
     if(value is not None):
         print(keyword, " = ", value)
         dissue_dict[keyword]['name'] = value.strip()
     else :
-        print(keyword, " = None... Skip")
+        if(keyword == 'assignee') :
+            dissue_dict[keyword]['name'] = None
+        elif (keyword == 'reporter') :
+            dissue_dict[keyword]['name'] = 'hlm-admin'
+        else :
+            print(keyword, " = None... Skip")
 
 def setWatchers(keyword, value) :
     if(value is not None):
@@ -136,7 +173,7 @@ def setWatchers(keyword, value) :
             #print("========================")
             #print(watcher.strip())
     else :
-        del dissue_dict[keyword]
+        del dissue_dict['customfield_10105']
         print(keyword, " = None... Skip")
 
 def setDuedate(keyword, value) :
@@ -195,6 +232,8 @@ def makeDevJiraJSON(key, value) :
         setIssueType(key, value)
     elif (key == 'parent'):
         setParent(key, value)
+    elif (key == 'Epic Name'):
+        setEpicName(key, value)
     elif (key == 'summary'):
         setSummarynDescription(key, value)
     elif (key == 'description'):
@@ -216,7 +255,7 @@ def makeDevJiraJSON(key, value) :
     elif (key == 'Common Notice'):
         setCommonNotice(key, value)
     else :
-        print("[Error] Set default="+key)
+        print("[Skip] Column - Unregistered key or field = ", key)
 
 
 form_class = uic.loadUiType("./QtUI/MainDialog.ui")[0];
@@ -321,36 +360,45 @@ class MyWindow(QMainWindow, form_class) :
         rows = wsheet.rows
         jira_keylist = makeKeyList(wsheet)
 
+        row_count = wsheet.max_row
+        col_count = wsheet.max_column
+        print('wsheet.max_row =', row_count)
+        print('wsheet.max_col =', col_count)
+
         for row in rows :
             if(i == 1) : i+=1; j = 1; continue
-            dissue_dict = copy.deepcopy(dissue_init_dict)
-            for key in jira_keylist :
-                if(key == 'Key') :
-                    j = 2; continue
-                if(key == 'Common Notice') :
-                    val = wsheet.cell(row = 2, column = j).value
-                else :
-                    val = wsheet.cell(row = i, column = j).value
-                #print("=====================")
-                #print(key, val)
-                #print("=====================")
-                makeDevJiraJSON(key, val)
-                j += 1
-            try :
-                print("========================================================")
-                print(dissue_dict)
-                new_dissue = dev_jira.create_issue(fields= dissue_dict)
-                #createdkey = new_dissue.raw['key']
-                #print("Created Key = ", createdkey)
-                #wsheet.cell(row = i, column = 1).value = createdkey
-                print("========================================================")
-            except Exception as e:
-                print(e)
-            row_count = wsheet.max_row
+
+            if(wsheet.cell(row = i, column = 2).value) : # if project is not null - create issue
+                dissue_dict = copy.deepcopy(dissue_init_dict)
+                for key in jira_keylist :
+                    if(key == 'key') :
+                        j = 2; continue
+                    if(key == 'Common Notice') :
+                        val = wsheet.cell(row = 2, column = j).value
+                    else :
+                        val = wsheet.cell(row = i, column = j).value
+                    #print("=====================")
+                    #print(key, val)
+                    #print("=====================")
+                    makeDevJiraJSON(key, val)
+                    j += 1
+                try :
+                    print("========================================================")
+                    print(dissue_dict)
+                    new_dissue = dev_jira.create_issue(fields= dissue_dict)
+                    #createdkey = new_dissue.raw['key']
+                    #print("Created Key = ", createdkey)
+                    #wsheet.cell(row = i, column = 1).value = createdkey
+                    print("========================================================")
+                except Exception as e:
+                    print(e)
+            else :
+                print("[Skip issue creation.....][row] = ", i)
+                pass
+
             progressing = int(i*100/row_count)
             self.ProgressBar.setValue(progressing)
             self.ProgressBar.update()
-            #column_count = wsheet.max_column
             i += 1
 
 
