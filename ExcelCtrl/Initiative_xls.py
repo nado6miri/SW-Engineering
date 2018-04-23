@@ -17,6 +17,15 @@ sheet = workbook["최종"]
 sheet['c5'] = 'demo-nsb'
 key = sheet['C4'].value
 print(key)
+
+source = workbook.active
+target1 = workbook.create_sheet("작업중")
+target2 = workbook.copy_worksheet(source)
+ss_sheet = workbook.get_sheet_by_name("최종 Copy")
+print(workbook.get_sheet_names())
+print(ss_sheet)
+ss_sheet.title = "금일작업본"
+
 workbook.save('webOS4.5_Initial-Initiative1.xlsx')
 
 
