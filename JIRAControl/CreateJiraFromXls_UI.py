@@ -376,17 +376,17 @@ class MyWindow(QMainWindow, form_class) :
 
         log = open('logfile.txt', 'wt')
 
-		'''
+        '''
         update_dict = {
             'customfield_10105' :[ {"name":"" },], #watchers
         }
-		'''
+        '''
         for row in rows :
             if(i == 1) : i+=1; j = 1; continue
 
             if(wsheet.cell(row = i, column = 2).value) : # if project is not null - create issue
                 dissue_dict = copy.deepcopy(dissue_init_dict)
-                msg = "\n######## Row = %d¹øÂ° Issue »ý¼º ½ÃÀÛ ÇÕ´Ï´Ù. #######\n" % i
+                msg = "\n######## Row = %d Creating issues. #######\n" % i
                 print(msg)
                 log.write(msg)
 
@@ -418,7 +418,7 @@ class MyWindow(QMainWindow, form_class) :
                     print(e)
 
             else :
-                msg = "\nRow = %d¹øÂ° Issue »ý¼º Skip ÇÕ´Ï´Ù.\n" % i
+                msg = "\nRow = %dï¿½ï¿½Â° Issue ï¿½ï¿½ï¿½ï¿½ Skip ï¿½Õ´Ï´ï¿½.\n" % i
                 print(msg)
                 log.write(msg)
                 pass

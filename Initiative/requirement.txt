@@ -1,0 +1,31 @@
+
+[요구사항 확정회 이전]
+1. ELT Review 미완료건
+2. RMS Initiative 미등록건
+3. Initative Ordering 관리
+4. Status가 2주이상 Pending
+
+[개발대기단계]
+1. Approved --> Backlog Refinement 장기 방치
+2. Backlog Refinement --> In-Progress로 장기 방치 항목
+
+[개발단계]
+-일정측면
+1. Status Summary 주간단위 Update 여부 확인
+2. Description 내부 Milestone / Epics Target 일정 지연여부 (Done 표시 안된 것)
+3. Description Epics 기술과 실제 Epic Issue 존재여부 확인
+4. Sprint별 Demo 항목 식별
+5. Sprint별 종료되는 Delivery 식별 (Release Sprint) --> 실제 Release Sprint와 Milestone과 일치여부 확인 작업필요
+6. Sprint별 Interim Release 항목 식별
+-품질측면
+7. Sprint별 검증 현황 자동/가시화후 품질 이상있는 항목 식별
+
+
+[이상적인 Case]
+1. Initiative별 구현진행율 (00%)
+
+
+[기타]
+1. Archi Review 진행현황
+2. FMEA Review 진행현황
+3. DRBFM Review 진행현황
