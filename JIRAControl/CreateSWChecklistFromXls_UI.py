@@ -280,7 +280,6 @@ def makeDevJiraJSON(key, value) :
     elif (key == 'components'):
         setComponents(key, value)
     elif (key == 'issuetype'):
-        print(key + ' = ' + value)
         setIssueType(key, value)
     elif (key == 'parent'):
         setParent(key, value)
@@ -450,9 +449,9 @@ class MyWindow(QMainWindow, form_class) :
                         val = wsheet.cell(row = 2, column = j).value
                     else :
                         val = wsheet.cell(row = i, column = j).value
-                    #print("=====================")
-                    #print(key, val)
-                    #print("=====================")
+                    print("=====================")
+                    print(key, val)
+                    print("=====================")
                     makeDevJiraJSON(key, val)
                     j += 1
                 try :

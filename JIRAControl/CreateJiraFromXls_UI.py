@@ -25,7 +25,9 @@ from PyQt5 import uic
 
 
 #http://hlm.lge.com/issue/rest/api/2/issue/GSWDIM-22476/
+
 #http://hlm.lge.com/issue/rest/api/2/issue/TVPLAT-3963/
+#http://hlm.lge.com/issue/rest/api/2/issue/TVPLAT-3963/editmeta
 
 #http://hlm.lge.com/qi/rest/api/2/issue/QEVENTSEVT-7232/ - Q
 
