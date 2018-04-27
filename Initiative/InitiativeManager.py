@@ -34,7 +34,7 @@ startSP = 'TVSP16_1'
 endSP = 'TVSP17_2'
 updateSP = 'TVSP18_1'
 
-org_SP_Info = {
+Sprint_Info = {
     'TVSP16_1' : '',  'TVSP16_2' : '',  'TVSP17_1' : '',  'TVSP17_2' : '',
     'TVSP18_1' : '',  'TVSP18_2' : '',  'TVSP19_1' : '',  'TVSP19_2' : '',
     'TVSP20_1' : '',  'TVSP20_2' : '',  'TVSP21_1' : '',  'TVSP21_2' : '',
@@ -46,7 +46,7 @@ org_SP_Info = {
     }
 
 
-org_epic_list = {
+epic_info = {
         'Key' : '',
         'Release_SP' : '',
         'Summary' : "",
@@ -56,8 +56,9 @@ org_epic_list = {
         'TVSP' : { },
     }
 
-org_initiative_info = {}
+initiative_info = {}
 jira_initiative_keylist = []
+jira_epic_keylist = []
 
 tmp = {
     'Initiative Key' : '',
@@ -97,15 +98,15 @@ org_init_list = [
 
 #####################################################################################################################
 # JIRA Control
-maxResultCnt = 1000
+maxResultCnt = 3000
 
 #===========================================================================
 # Get filtered issue with Filter ID in Dev Tracker
 # filter 지정을 통한 Initiative 검색
 #===========================================================================
 def getFilterIDResult(jiraHandle, filterId, getFieldList=()) :
-    setFilterID = 'filter =' + str(filterId)
-    print('strFilterID = ', setFilterID)
+    setFilterID = 'filter = ' + str(filterId)
+    print('strFilterID =', setFilterID)
     #resultIssue = jiraHandle.search_issues(setFilterID, startAt = 0, maxResults = 1000, fields = setfield, expand=None)
     resultIssue = jiraHandle.search_issues(setFilterID, startAt = 0, maxResults = maxResultCnt, fields = getFieldList, expand=None)
     print("[Tracker] Get JIRA Issue with Specific Filter ID: " + setFilterID)
@@ -132,10 +133,10 @@ def getFilterQueryResult(jiraHandle, filterQuery, getFieldList=None) :
 def getKey(jiraIssue) :
     value = jiraIssue.raw['key']
     if(value != None) :
-        print("key = ", value)
+        #print("key = ", value)
         return value
 
-    print("key = Null")
+    #print("key = Null")
     return None
 
 
@@ -496,6 +497,13 @@ def getEpicsMilestoneFromDesc(description, fieldtitle) :
 #####################################################################################################################
 # Exel Control
 
+#===========================================================================
+# Get row count of excel (with Data)
+# [param] Sheetname : Excel Sheet handle
+# [param] rowpos : start row position of Data ( 1 ~ XXXX )
+# [param] colpos : reference col index to detect exact row count (This column should be filled with data)
+# [return] row count
+#===========================================================================
 def getRowCount(Sheetname, rowpos, colpos) :
     for i in range(rowpos, 50000) :
         val = Sheetname.cell(row = i, column = colpos).value
@@ -505,6 +513,14 @@ def getRowCount(Sheetname, rowpos, colpos) :
     print("Row Count of ", Sheetname, " = ", i-rowpos)
     return (i-rowpos)
 
+
+#===========================================================================
+# Get Column count of excel (with Data)
+# [param] Sheetname : Excel Sheet handle
+# [param] rowpos : start row position of Title / Header
+# [param] colpos : start col position of title
+# [return] column count
+#===========================================================================
 def getColumnCount(Sheetname, rowpos, colpos) :
     for i in range(colpos,50000) :
         val = Sheetname.cell(row = rowpos, column = i).value
@@ -515,6 +531,13 @@ def getColumnCount(Sheetname, rowpos, colpos) :
     return (i-colpos)
 
 
+
+#===========================================================================
+# Get Column Index of excel (with title)
+# [param] Sheetname : Excel Sheet handle
+# [param] rowpos : start row position of Title / Header
+# [return] column Index
+#===========================================================================
 def getColumnIndex(Sheetname, row, title) :
     index = 1
     for col in range(1, Sheetname.max_column) :
@@ -524,13 +547,21 @@ def getColumnIndex(Sheetname, row, title) :
 
     if (Sheetname.max_column <= index) :
         index = None
-        print("title = ", title, " : Can't find title in exel")
+        #print("title = ", title, " : Can't find title in exel")
     else :
-        print("title = ", title, ", Index = ", index)
+        #print("title = ", title, ", Index = ", index)
+        pass
 
     return (index)
 
 
+
+#===========================================================================
+# Get row Index of initiative to find
+# [param] Sheetname : Excel Sheet handle
+# [param] InitiativeKey : InitiativeKey to find
+# [return] row Index or 0 (Not found)
+#===========================================================================
 def getInitiativeRowIndex(Sheetname, InitiativeKey) :
     isFound = False
     for row_index in range(1, MAX_RowCount+1) :
@@ -543,12 +574,20 @@ def getInitiativeRowIndex(Sheetname, InitiativeKey) :
                 break;
 
     if(isFound == False) :
-        print("Not Found Initiative Key of ", Sheetname, " : Key = ", InitiativeKey, ", Index = ", row_index)
+        #print("Not Found Initiative Key of ", Sheetname, " : Key = ", InitiativeKey, ", Index = ", row_index)
         row_index = 0
 
     return row_index
 
 
+
+
+#===========================================================================
+# Get row Index of Epic to find
+# [param] Sheetname : Excel Sheet handle
+# [param] InitiativeKey : Epic to find
+# [return] row Index or 0 (Not found)
+#===========================================================================
 def getEpicRowIndex(Sheetname, EpicKey) :
     isFound = False
     for row_index in range(1, MAX_RowCount+1) :
@@ -561,15 +600,22 @@ def getEpicRowIndex(Sheetname, EpicKey) :
                 break;
 
     if(isFound == False) :
-        print("Not Found Epic Key of ", Sheetname, " : Key = ", EpicKey, ", Index = ", row_index)
+        #print("Not Found Epic Key of ", Sheetname, " : Key = ", EpicKey, ", Index = ", row_index)
         row_index = 0
 
     return row_index
 
 
+#===========================================================================
+# Get title list of header / title
+# [param] Sheetname : Excel Sheet handle
+# [param] row : start row position of Title / Header
+# [param] col : start col position of title
+# [return] title[]
+#===========================================================================
 def getTitleListfromXls(Sheetname, row, col) :
     title = []
-    for i in range(1, MAX_ColCount+1) :
+    for i in range(col, MAX_ColCount+1) :
         title.append(str(Sheetname.cell(row = row, column = i).value).strip())
 
     #print("Title List of ", Sheetname, " = ", title)
@@ -577,9 +623,15 @@ def getTitleListfromXls(Sheetname, row, col) :
 
 
 
-def getInitiativeKeyListfromXls(Sheetname, row) :
+#===========================================================================
+# Get All Initiative Key List from Excel
+# [param] Sheetname : Excel Sheet handle
+# [param] rowpos : start row position of Data ( 1 ~ XXXX )
+# [return] Initiative Key List[ 'KEY1', 'KEY2', ... ]
+#===========================================================================
+def getInitiativeKeylist(Sheetname, row) :
     initative_key = []
-    for row_index in range(1, MAX_RowCount+1) :
+    for row_index in range(row, MAX_RowCount+1) :
         type = str(Sheetname.cell(row = row_index, column = CI_IssueType).value).strip()
         if(type == "Initiative") :
             initative_key.append(str(Sheetname.cell(row = row_index, column = CI_InitKey).value).strip())
@@ -588,9 +640,32 @@ def getInitiativeKeyListfromXls(Sheetname, row) :
     return initative_key
 
 
+#===========================================================================
+# Get All Epic Key List from Excel
+# [param] Sheetname : Excel Sheet handle
+# [param] rowpos : start row position of Data ( 1 ~ XXXX )
+# [return] Epic Key List[ 'KEY1', 'KEY2', ... ]
+#===========================================================================
+def getEpicKeyListfromXls(Sheetname, row) :
+    epic_key = []
+    for row_index in range(row, MAX_RowCount+1) :
+        type = str(Sheetname.cell(row = row_index, column = CI_IssueType).value).strip()
+        if(type == "EPIC") :
+            epic_key.append(str(Sheetname.cell(row = row_index, column = CI_EpicKey).value).strip())
 
+    #print("Epic Key List of ", Sheetname, " = ", epic_key)
+    return epic_key
+
+
+
+#===========================================================================
+# Get Sprint History (dict) from Excel
+# [param] Sheetname : Excel Sheet handle
+# [param] KeyID : Initiative or Epic Key to get Sprint History from excel
+# [return] Sprint_Info{ 'SP16_1' : '', 'SP16_2' : '', .... }
+#===========================================================================
 def getSprintHistoryfromXls(Sheetname, KeyID, IssueType) :
-    global org_initiative_info
+    global initiative_info
     if(IssueType == "Initiative") :
         rowIndex = getInitiativeRowIndex(Sheetname, KeyID)
     elif (IssueType == "EPIC") :
@@ -603,41 +678,52 @@ def getSprintHistoryfromXls(Sheetname, KeyID, IssueType) :
     else :
         for col_index in range(CI_StartPos, CI_EndPos+1) :
             tvspstr = str(Sheetname.cell(row = 2, column = col_index).value).strip()
-            org_SP_Info[tvspstr] = str(Sheetname.cell(row = rowIndex, column = col_index).value).strip()
+            Sprint_Info[tvspstr] = str(Sheetname.cell(row = rowIndex, column = col_index).value).strip()
 
         if(IssueType == "Initiative") :
-            #print("===============Update Initiative org_SP_Info===================== Row Index =", rowIndex)
+            #print("===============Update Initiative Sprint_Info===================== Row Index =", rowIndex)
             pass
         elif (IssueType == "EPIC") :
-            #print("===============Update Epic org_SP_Info===================== Row Index =", rowIndex)
+            #print("===============Update Epic Sprint_Info===================== Row Index =", rowIndex)
             pass
-    #print (org_SP_Info)
-    return org_SP_Info
+    #print (Sprint_Info)
+    return Sprint_Info
 
 
+
+#===========================================================================
+# Get Epic Information from Excel
+# [param] Sheetname : Excel Sheet handle
+# [param] EpicKey : Epic Key to get detail information from excel
+# [return] epic_info { 'key' : '', 'summary' : '', Sprint_Info{ 'SP16_1' : '', 'SP16_2' : '', .... } }
+#===========================================================================
 def getEpicInfofromXls(Sheetname, EpicKey) :
-    global org_initiative_info
+    global initiative_info
 
     for row_index in range(1, MAX_RowCount+1) :
         getEpicKey = str(Sheetname.cell(row = row_index, column = CI_EpicKey).value).strip()
-        org_epic_list["Release_SP"] = str(Sheetname.cell(row = row_index, column = CI_ReleaseSP).value).strip()
+        epic_info["Release_SP"] = str(Sheetname.cell(row = row_index, column = CI_ReleaseSP).value).strip()
 
         if(getEpicKey == EpicKey) :
-            org_epic_list['Key'] = getEpicKey
+            epic_info['Key'] = getEpicKey
             spInfo = getSprintHistoryfromXls(cur_sheet, getEpicKey, "EPIC")
-            org_epic_list['TVSP'] = spInfo
+            epic_info['TVSP'] = spInfo
+
+    return epic_info
 
 
-    return org_epic_list
 
+#===========================================================================
+# Get All Initiative - Epic Lists from Excel
+# [param] Sheetname : Excel Sheet handle
+# [return] epic_key [ { 'key' : 'Initative Key',  'epiclist' : [ 'Epic Key1', 'Epic Key2', ... ]}, ....  }
+#===========================================================================
 def getInitiativeAllEpicsListfromXls(Sheetname) :
     epic_key = []
-    tmp = { 'key' : '', 'epiclist' : []}
-    tmp['key'] = dissue.raw['key']
-
-    keylist = getInitiativeKeyListfromXls(Sheetname, 3)
+    keylist = getInitiativeKeylist(Sheetname, 3)
 
     for keyID in keylist :
+        tmp = { 'key' : '', 'epiclist' : []}
         tmp['key'] = keyID
         for row_index in range(1, MAX_RowCount+1) :
             type = str(Sheetname.cell(row = row_index, column = CI_IssueType).value).strip()
@@ -646,12 +732,17 @@ def getInitiativeAllEpicsListfromXls(Sheetname) :
                 tmp['epiclist'].append(str(Sheetname.cell(row = row_index, column = CI_EpicKey).value).strip())
         epic_key.append(tmp)
 
-    print("*********** All Epic key List from Xls **********************")
-    print(epic_key)
+    #print("*********** All Epic key List from Xls **********************")
+    #print(epic_key)
     return epic_key
 
 
-
+#===========================================================================
+# Get a specific Initiative - Epic Lists from Excel
+# [param] Sheetname : Excel Sheet handle
+# [param] InitiativeKey : Initiative Key to get Epic Lists
+# [return] EpicList[ 'Epic Key1', 'Epic Key2', ... ]
+#===========================================================================
 def getInitiativeEpicsListfromXls(Sheetname, InitiativeKey) :
     epic_key = []
     for row_index in range(1, MAX_RowCount+1) :
@@ -660,11 +751,16 @@ def getInitiativeEpicsListfromXls(Sheetname, InitiativeKey) :
         if(type == "EPIC" and InitiativeKey == getInitkey) :
             epic_key.append(str(Sheetname.cell(row = row_index, column = CI_EpicKey).value).strip())
 
-    print("Initiative Key = ", InitiativeKey, " Epic Key List of ", Sheetname, " = ", epic_key)
+    #print("Initiative Key = ", InitiativeKey, " Epic Key List of ", Sheetname, " = ", epic_key)
     return epic_key
 
 
 
+#===========================================================================
+# Get All Initiative - Epic Lists from Jira
+# [param] filterResult : Jira Result from Filtered JIRA Query
+# [return] list[ { 'key' : 'Initative Key',  'epiclist' : [ 'Epic Key1', 'Epic Key2', ... ]}, ....  }
+#===========================================================================
 def getInitiativeAllEpicsListfromJira(filterResult) :
     epic_key = []
 
@@ -688,60 +784,107 @@ def getInitiativeAllEpicsListfromJira(filterResult) :
         if(bfound == True) :
             epic_key.append(tmp)
 
-    #print("*********** All Epic key List **********************")
+    #print("*********** Initiative - All Epic key List **********************")
     #print(epic_key)
     return epic_key
 
 
 
+#===========================================================================
+# Get All Epic Lists from Jira
+# [param] filterResult : Jira Result from Filtered JIRA Query
+# [return] epic_key[ 'Epic Key1', 'Epic Key2', ... ]
+#===========================================================================
+def getEpicKeyListfromJira(filterResult) :
+    epic_key = []
+
+    for dissue in filterResult :
+        # Get issue with All Fields in Dev Tracker
+        for issuelink in dissue.raw['fields']['issuelinks'] :
+            if 'outwardIssue' in issuelink :
+                if(issuelink['outwardIssue']['fields']['issuetype']['name'] == 'Epic') :
+                    #print ("Key = ", dissue.raw['key'], " Status = ", issuelink['outwardIssue']['fields']['status']['name'], " Linked Issue = ", issuelink['outwardIssue']['key'])
+                    epic_key.append(issuelink['outwardIssue']['key'])
+            if 'inwardIssue' in issuelink :
+                if(issuelink['inwardIssue']['fields']['issuetype']['name'] == 'Epic') :
+                    #print ("Key = ", dissue.raw['key'], " Status = ", issuelink['inwardIssue']['fields']['status']['name'], " Linked Issue = ", issuelink['inwardIssue']['key'])
+                    epic_key.append(issuelink['inwardIssue']['key'])
+
+    # remove duplicate item in list
+    epic_key = RemoveDuplicateInList(epic_key)
+
+    #print("*********** All Epic key List from Jira **********************")
+    #print(epic_key)
+    return epic_key
+
+
+#===========================================================================
+# Get a specific Initiative - Epic Lists from Jira
+# [param] jiraAllEpicList : list[ { 'key' : 'Initative Key',  'epiclist' : [ 'Epic Key1', 'Epic Key2', ... ]}, ....  }
+# [param] InitiativeKey : Initiative Key to get Epic Lists
+# [return] EpicList[ 'Epic Key1', 'Epic Key2', ... ]
+#===========================================================================
 def getInitiativeEpicsListfromJira(jiraAllEpicList, InitiativeKey) :
     epic_key = []
 
-    for epic in jiraAllEpicList :
-        if (InitiativeKey == epic['key']) :
-            epic_key.append(epic['epiclist'])
+    for item in jiraAllEpicList :
+        if (InitiativeKey == item['key']) :
+            epic_key.append(item['epiclist'])
 
-    #print("*********** Epic key **********************")
+    #print("*********** Initiative Key = {0} Epic key from JIRA **********************".format(InitiativeKey))
     #print(epic_key)
     return epic_key
 
 
 
-
+#===========================================================================
+# Get the detail Initiative Information needed for history management from excel
+# [param] Sheetname : Excel Sheet handle
+# [param] keyList : List[ 'KEY1', 'KEY2', ... ]
+# [return] initiative_info
+#===========================================================================
 def getInitiativeDetailInfofromXls(Sheetname, keyList) :
     for key in keyList :
-        global org_initiative_info
-        org_initiative_info = copy.deepcopy(tmp)
+        global initiative_info
+        initiative_info = copy.deepcopy(tmp)
 
         rowIndex = getInitiativeRowIndex(Sheetname, key)
 
         if(rowIndex > 0) :
             print("\n######## {0} row - Update Initiative Detail information from Xls".format(rowIndex))
-            org_initiative_info["Initiative Key"] = str(Sheetname.cell(row = rowIndex, column = CI_InitKey).value).strip()
-            org_initiative_info["Release_SP"] = str(Sheetname.cell(row = rowIndex, column = CI_ReleaseSP).value).strip()
-            org_initiative_info["관리대상"] = str(Sheetname.cell(row = rowIndex, column = 2).value).strip()
-            org_initiative_info["Risk 관리 대상"] = str(Sheetname.cell(row = rowIndex, column = 3).value).strip()
+            initiative_info["Initiative Key"] = str(Sheetname.cell(row = rowIndex, column = CI_InitKey).value).strip()
+            initiative_info["Release_SP"] = str(Sheetname.cell(row = rowIndex, column = CI_ReleaseSP).value).strip()
+            initiative_info["관리대상"] = str(Sheetname.cell(row = rowIndex, column = 2).value).strip()
+            initiative_info["Risk 관리 대상"] = str(Sheetname.cell(row = rowIndex, column = 3).value).strip()
 
             #SP
             spInfo = getSprintHistoryfromXls(cur_sheet, key, "Initiative")
-            org_initiative_info['TVSP'] = spInfo
+            initiative_info['TVSP'] = spInfo
 
             #EPIC
             epic_list = getInitiativeEpicsListfromXls(cur_sheet, key)
             for epickey in epic_list :
                 epicInfo = getEpicInfofromXls(cur_sheet, epickey)
-                org_initiative_info['EPIC'].append(epicInfo)
+                initiative_info['EPIC'].append(epicInfo)
 
-            #print(org_initiative_info)
+            #print(initiative_info)
 
-    return org_initiative_info
+    return initiative_info
 
 
 
 def getFilteredInitiativeInfofromJira(jiraHandle, filterid) :
     #Filter ID
     Initiative_webOS45_Initial_Dev = filterid
-    result = getFilterIDResult(jiraHandle, Initiative_webOS45_Initial_Dev)
+
+    #setfield = ('summary, duedate, assignee, status, created, components, labels')
+    #result = getFilterIDResult(jiraHandle, Initiative_webOS45_Initial_Dev, setfield)
+    if(Initiative_webOS45_Initial_Dev == 42101) :
+        result = getFilterIDResult(jiraHandle, Initiative_webOS45_Initial_Dev)
+    else :
+        setfield = ('summary, comment, assignee, duedate, created, labels')
+        result = getFilterIDResult(jiraHandle, Initiative_webOS45_Initial_Dev, setfield)
+
     return result
 
 
@@ -754,9 +897,10 @@ def RemoveDuplicateInList(duplicate):
             final_list.append(num)
     return final_list
 
-def DiffBetweenLists(listA, listB) :
+
+def getDiffList(listA, listB) :
     return (list(set(listA) - set(listB)))
-    print(newkey)
+
 
 
 if __name__ == "__main__" :
@@ -770,7 +914,7 @@ if __name__ == "__main__" :
     log = open('Initiative_logfile.txt', 'wt')
 
     # workbook 만들기
-    workbook = xlsrd.load_workbook('Initiative일정관리_180423_v4.xlsx')
+    workbook = xlsrd.load_workbook('Initiative일정관리_180426_v1.xlsx')
     cur_sheet = workbook["최종"]
 
     # set Init data
@@ -792,21 +936,42 @@ if __name__ == "__main__" :
     CI_InitOrder = getColumnIndex(cur_sheet, 2, "Initiative Order")
 
 
-    xls_initiative_keylist = getInitiativeKeyListfromXls(cur_sheet, 3)
+    xls_initiative_keylist = getInitiativeKeylist(cur_sheet, 3)
     base = getInitiativeDetailInfofromXls(cur_sheet, xls_initiative_keylist)
 
     # jira filtering
-    filterResult = getFilteredInitiativeInfofromJira(dev_jira, 42101)
+    Initiative_FilterResult = getFilteredInitiativeInfofromJira(dev_jira, 42101)
+    Epic_FilterResult = getFilteredInitiativeInfofromJira(dev_jira, 42317)
 
     # data handling...
-    for issue in filterResult :
+    for issue in Initiative_FilterResult :
         jira_initiative_keylist.append(getKey(issue))
 
-    newkey = DiffBetweenLists(jira_initiative_keylist, xls_initiative_keylist)
+    # Compare Initiative List ........
+    print("\n New Initiative List ..........")
+    newkey = getDiffList(jira_initiative_keylist, xls_initiative_keylist)
     print(newkey)
-    delkey = DiffBetweenLists(xls_initiative_keylist, jira_initiative_keylist)
+    print("\n Del Initiative List ..........")
+    delkey = getDiffList(xls_initiative_keylist, jira_initiative_keylist)
     print(delkey)
 
+
+    # Compare Epic List ........
+    for issue in Epic_FilterResult :
+        jira_epic_keylist.append(getKey(issue))
+
+    jiralink_epic_keylist = getEpicKeyListfromJira(Initiative_FilterResult)
+
+    print("\n Compare1 Epic List (jira filter - jira link)..........")
+    newkey = getDiffList(jira_epic_keylist, jiralink_epic_keylist)
+    print(newkey)
+    print("\n Compare2 Epic List (jira link - jira filter)..........")
+    delkey = getDiffList(jiralink_epic_keylist, jira_epic_keylist)
+    print(delkey)
+
+
+
+    '''
     finalList = jira_initiative_keylist
     finalList.extend(xls_initiative_keylist)
     finalList = RemoveDuplicateInList(finalList)
@@ -825,13 +990,31 @@ if __name__ == "__main__" :
 
     print("\n#### Display the Base Data to be managed by SPE Initiative members ####")
     print(base)
-
+    '''
 
     print("\n#### Start to update initiative information from JIRA Lastest Valule to be managed by SPE Initiative members ####")
 
-    result = getInitiativeAllEpicsListfromJira(filterResult)
-    getInitiativeEpicsListfromJira(result, 'TVPLAT-11806')
-    getInitiativeAllEpicsListfromXls(cur_sheet)
+    jira_epic_keylist = getInitiativeAllEpicsListfromJira(Initiative_FilterResult)
+    getInitiativeEpicsListfromJira(jira_epic_keylist, 'TVPLAT-11806')
+    xls_epic_keylist = getInitiativeAllEpicsListfromXls(cur_sheet)
+
+    a = getEpicKeyListfromJira(Initiative_FilterResult)
+    a = RemoveDuplicateInList(a)
+    b = getEpicKeyListfromXls(cur_sheet, 3)
+    b = RemoveDuplicateInList(b)
+
+    print("\n New Epic List ..........")
+    newEpickey = getDiffList(a, b)
+    print(newEpickey)
+    print("\n Del Epic List ..........")
+    delEpickey = getDiffList(b, a)
+    print(delEpickey)
+
+
+
+    '''
+
+    '''
 
     '''
     s = set(temp2)
@@ -872,7 +1055,7 @@ if __name__ == "__main__" :
     getColumnIndex(Sheetname, 2, "기타")
     getColumnIndex(Sheetname, 2, "TVSP17-2")
     getColumnIndex(Sheetname, 2, "Signal")
-    getInitiativeKeyListfromXls(Sheetname, 3, "Initiative Key")
+    getInitiativeKeylist(Sheetname, 3, "Initiative Key")
     getTitleListfromXls(Sheetname, 2, 1)
     getInitiativeDetailInfofromXls(Sheetname)
 
