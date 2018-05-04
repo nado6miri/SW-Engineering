@@ -1013,22 +1013,13 @@ def getEpicKeyListfromJira(filterResult, rawData) :
 # [param] filterResult : Jira Result from Filtered JIRA Query (Epic Filter)
 # [return] Story key[ 'Story Key1', 'Story Key2', 'Task Key3'... ]
 #===========================================================================
-def getStorynTaskKeyListfromJira(dissue) :
+def getStorynTaskKeyListfromJira(stroyissue) :
     story_key = []
+    for story in storyissue :
+        story_key.append(stroyissue.raw['key'])
 
-    # Get issue with All Fields in Dev Tracker
-    for issuelink in dissue.raw['fields']['issuelinks'] :
-        if 'outwardIssue' in issuelink :
-            #if(issuelink['outwardIssue']['fields']['issuetype']['name'] == 'Story') :
-                #print ("Key = ", dissue.raw['key'], " Status = ", issuelink['outwardIssue']['fields']['status']['name'], " Linked Issue = ", issuelink['outwardIssue']['key'])
-            story_key.append(issuelink['outwardIssue']['key'])
-        if 'inwardIssue' in issuelink :
-            #if(issuelink['inwardIssue']['fields']['issuetype']['name'] == 'Story') :
-                #print ("Key = ", dissue.raw['key'], " Status = ", issuelink['inwardIssue']['fields']['status']['name'], " Linked Issue = ", issuelink['inwardIssue']['key'])
-            story_key.append(issuelink['inwardIssue']['key'])
-
-    #print("*********** All Epic key List from Jira (rawData = {0})**********************".format(rawData))
-    #print(story_key)
+    print("*********** All Story key List from Jira (dissue.raw['key'] = {0})**********************".format(dissue.raw['key']))
+    print(story_key)
     return story_key
 
 #===========================================================================
@@ -1057,22 +1048,14 @@ def getChildEpicResolvedCntfromJira(dissue) :
 #===========================================================================
 # Get Story and Task Resolved Count of Initiative from Jira
 # [param] filterResult : Jira Result from Filtered JIRA Query (Initiative or Epic Filter)
-# [return] epic_key[ 'Epic Key1', 'Epic Key2', ... ]
+# [return] resolved count of Story or Task
 #===========================================================================
-def getChildStorynTaskResolvedCntfromJira(dissue) :
+def getChildStorynTaskResolvedCntfromJira(storyissue) :
     resolvedCnt = 0
-    # Get issue with All Fields in Dev Tracker
-    for issuelink in dissue.raw['fields']['issuelinks'] :
-        if 'outwardIssue' in issuelink :
-            #issuetype = issuelink['outwardIssue']['fields']['issuetype']['name']
-            #if(issuetype == 'Story' or issuetype == 'Task') :
-            status = issuelink['outwardIssue']['fields']['status']['name']
-            if(status == "Resolved" or status == "Closed" or status == "Deferred" or status == "Delivered") :
-                resolvedCnt += 1
-        if 'inwardIssue' in issuelink :
-            status = issuelink['inwardIssue']['fields']['status']['name']
-            if(status == "Resolved" or status == "Closed" or status == "Deferred" or status == "Delivered") :
-                resolvedCnt += 1
+    for story in storyissue :
+        status = getStatus(story)
+        if(status == "Resolved" or status == "Closed" or status == "Deferred" or status == "Delivered") :
+            resolvedCnt += 1
 
     return resolvedCnt
 
@@ -1206,9 +1189,13 @@ def getInitiativeDetailInfofromJira(Initiative_FilterResult, Epic_FilterResult, 
                     epic['CreatedDate'] = getCreatedDate(epicissue)
                     epic['TVSP'][updateSP] = conversionDuedateToSprint(getDueDate(epicissue))
                     epic['duedate'] = getDueDate(epicissue)
-                    epic['STORY'] = getStorynTaskKeyListfromJira(epicissue)
+
+                    sql = "'Epic Link' = " + epic['Epic Key']
+                    storyissue = getFilterQueryResult(dev_jira, sql, getFieldList=None)
+                    epic['STORY'] = getStorynTaskKeyListfromJira(storyissue)
+
                     epic['StroyCnt'] = len(epic['STORY'])
-                    epic['StoryResolutionCnt'] = getChildStorynTaskResolvedCntfromJira(epicissue)
+                    epic['StoryResolutionCnt'] = getChildStorynTaskResolvedCntfromJira(storyissue)
                     initiative['StoryCnt'] += epic['StroyCnt']
                     initiative['StoryResolutionCnt'] += epic['StoryResolutionCnt']
 
@@ -1430,7 +1417,7 @@ def prepareNewXlsSheet(Sheetname, start_row, start_col) :
 #===========================================================================
 if __name__ == "__main__" :
     # jira Handle open
-    dev_jira = JIRA(DevTracker, basic_auth = ("sungbin.na", "Sungbin@1805"))
+    dev_jira = JIRA(DevTracker, basic_auth = ("", ""))
 
     # create log file
     if (os.path.isfile("Initiative_logfile.txt")) :
