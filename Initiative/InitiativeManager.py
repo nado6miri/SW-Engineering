@@ -1013,13 +1013,13 @@ def getEpicKeyListfromJira(filterResult, rawData) :
 # [param] filterResult : Jira Result from Filtered JIRA Query (Epic Filter)
 # [return] Story key[ 'Story Key1', 'Story Key2', 'Task Key3'... ]
 #===========================================================================
-def getStorynTaskKeyListfromJira(stroyissue) :
+def getStorynTaskKeyListfromJira(storyissue) :
     story_key = []
     for story in storyissue :
-        story_key.append(stroyissue.raw['key'])
+        story_key.append(story.raw['key'])
 
-    print("*********** All Story key List from Jira (dissue.raw['key'] = {0})**********************".format(dissue.raw['key']))
-    print(story_key)
+    #print("*********** All Story key List from Jira (dissue.raw['key'] = {0})**********************".format(storyissue.raw['key']))
+    #print(story_key)
     return story_key
 
 #===========================================================================
