@@ -126,7 +126,7 @@ def getFilterQueryResult(jiraHandle, filterQuery, getFieldList=None) :
     # Get Filtered issue with JQL Querfy String in Q/Dev Tracker
     #setFilter = 'Filter in (M3.LK61.EU.QA1, M3.LK61.EU.QA2, M3.LK61.EU.QA3, M3.LK61.EU.QA4)'
     resultIssue = jiraHandle.search_issues(filterQuery, startAt = 0, maxResults = maxResultCnt, fields = getFieldList, expand=None)
-    print("[Tracker] Get JIRA Issue with Specific Filter String: " + filterQuery)
+    #print("[Tracker] Get JIRA Issue with Specific Filter String: " + filterQuery)
     return resultIssue
 
 
