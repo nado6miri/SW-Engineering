@@ -62,6 +62,10 @@ dissue_init_dict = {
     'customfield_17305' : '' , # 단계별 세부 영역
     'customfield_17306' : '' , # 체크리스트
     'customfield_17307' : '' , # 점검 대상 산출물
+
+    #Story & Task field Only
+    'customfield_17308' : '' , # 현업 Self Check 점수
+    'customfield_17309' : '' , # 현업 Self Check 평가 근거
 }
 
 Islogin = False
@@ -273,6 +277,35 @@ def setSWDevOutput(keyword, value) :
         print(keyword, " = None... Skip")
 
 
+#'customfield_17308' :  , # 현업 Self Check 점수
+def setSelfCheckScore(keyword, value) :
+    if(value is not None):
+        issuetype = dissue_dict['issuetype']['name']
+        if(issuetype == 'Task' or issuetype == 'Story') :
+            print(keyword, " = ", value)
+            dissue_dict['customfield_17308'] = str(value)
+        else :
+            del dissue_dict['customfield_17308']
+            print("Issue type is not Story or Task.... No need to set this field... delete this keyword")
+    else :
+        del dissue_dict['customfield_17308']
+        print(keyword, " = None... Skip")
+
+
+#'customfield_17309' :  , # 현업 Self Check 평가 근거
+def setSelfCheckEvidence(keyword, value) :
+    if(value is not None):
+        issuetype = dissue_dict['issuetype']['name']
+        if(issuetype == 'Task' or issuetype == 'Story') :
+            print(keyword, " = ", value)
+            dissue_dict['customfield_17309'] = str(value)
+        else :
+            del dissue_dict['customfield_17309']
+            print("Issue type is not Story or Task.... No need to set this field... delete this keyword")
+    else :
+        del dissue_dict['customfield_17309']
+        print(keyword, " = None... Skip")
+
 
 def makeDevJiraJSON(key, value) :
     if (key == 'project') :
@@ -314,6 +347,10 @@ def makeDevJiraJSON(key, value) :
         setSWDevCheckList(key, value)
     elif (key == '점검 대상 산출물'):
         setSWDevOutput(key, value)
+    elif (key == '현업 Self Check 점수') :
+        setSelfCheckScore(key, value)
+    elif (key == '현업 Self Check 평가 근거') :
+        setSelfCheckEvidence(key, value)
     else :
         print("[Skip] Column - Unregistered key or field = ", key)
 

@@ -4,8 +4,8 @@ import copy
 import time
 
 #for Jira control
-#from jira import JIRA
-#from jira.exceptions import JIRAError
+from jira import JIRA
+from jira.exceptions import JIRAError
 
 #pip install XlsxWriter
 
@@ -31,7 +31,8 @@ import copy
 
 myfont = Font(name='맑은 고딕', size = 10, bold=True)
 myalignment = Alignment(horizontal='center', vertical='center')
-myfill = PatternFill(patternType='solid', fgColor=Color('FFC000'))
+#myfill = PatternFill(patternType='solid', fgColor=Color('FFC000'))
+myfill = PatternFill(patternType='solid', fgColor=Color('000000'))
 myborder = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
 
 
@@ -48,10 +49,10 @@ default_Sprint_Info = {
     'TVSP18_1' : '',  'TVSP18_2' : '',  'TVSP19_1' : '',  'TVSP19_2' : '',
     'TVSP20_1' : '',  'TVSP20_2' : '',  'TVSP21_1' : '',  'TVSP21_2' : '',
     'TVSP22_1' : '',  'TVSP22_2' : '',  'TVSP23_1' : '',  'TVSP23_2' : '',
-    'TVSP24_1' : '',  'TVSP24_2' : '',  'TVSP25_1' : '',  'TVSP25_2' : '',
-    'TVSP26_1' : '',  'TVSP26_2' : '',  'TVSP27_1' : '',  'TVSP27_2' : '',
-    'TVSP28_1' : '',  'TVSP28_2' : '',  'TVSP29_1' : '',  'TVSP29_2' : '',
-    'TVSP30_1' : '',  'TVSP30_2' : '',  'TVSP31_1' : '',  'TVSP31_2' : '',
+#    'TVSP24_1' : '',  'TVSP24_2' : '',  'TVSP25_1' : '',  'TVSP25_2' : '',
+#    'TVSP26_1' : '',  'TVSP26_2' : '',  'TVSP27_1' : '',  'TVSP27_2' : '',
+#    'TVSP28_1' : '',  'TVSP28_2' : '',  'TVSP29_1' : '',  'TVSP29_2' : '',
+#    'TVSP30_1' : '',  'TVSP30_2' : '',  'TVSP31_1' : '',  'TVSP31_2' : '',
     }
 
 default_epic_info = {
@@ -93,11 +94,11 @@ default_initiative_info = {
         }
 
 
-finalInfo = []
-
 #####################################################################################################################
 # JIRA Control
 maxResultCnt = 3000
+
+
 
 #===========================================================================
 # Get filtered issue with Filter ID in Dev Tracker
@@ -151,7 +152,8 @@ def getSummary(jiraIssue) :
         return value
 
     #print("summary = Null")
-    return None
+    #return None
+    return 'None'
 
 
 #===========================================================================
@@ -200,7 +202,8 @@ def getComponents(jiraIssue) :
         return value
 
     #print("components = Null")
-    return None
+    #return None
+    return 'None'
 
 
 #===========================================================================
@@ -212,11 +215,35 @@ def getReleaseSprint(jiraIssue) :
     value = jiraIssue.raw['fields']['customfield_15926']
     if(value != None) :
         #print("Release Sprint = ", value)
-        return value
+        retstr = "".join(value)
+        return retstr
 
     #print("Release Sprint = Null")
-    return None
+    #return None
+    return 'None'
 
+
+#===========================================================================
+# convert created date to datetime obect
+# [param] createddate : created
+# [return] datetime object
+#===========================================================================
+def conversionCreatedDateToDatetime(datedata) :
+    datedata = str(datedata)
+    result = datedata.split(' ')
+    result = result[0] # take yyyy-mm-dd area
+    result = result.split('-')
+
+    if(len(result) >= 3) :
+        yyyy = result[0]
+        mm = result[1]
+        mm = mm.replace('0', '')
+        dd = result[2]
+        dd = dd.replace('0', '')
+
+        return datetime(int(yyyy), int(mm), int(dd))
+    else :
+        return datetime(2200, 1, 1)
 
 #===========================================================================
 # convert duedate to Sprint
@@ -224,47 +251,54 @@ def getReleaseSprint(jiraIssue) :
 # [return] Sprint str
 #===========================================================================
 def conversionDuedateToSprint(duedate) :
-    if(duedate >= '' and duedate <= '') :
+    targetDate = conversionCreatedDateToDatetime(duedate)
+
+    #print("conversionDuedateToSprint = org {0}, conversion = {1}".format(duedate, targetDate))
+    log.write("conversionDuedateToSprint = org {0}, conversion = {1}".format(duedate, targetDate))
+
+    if(targetDate < TVSP11_Start) :
+        return 'TVSP11이전항목'
+    if(targetDate >= TVSP11_Start and targetDate < TVSP12_Start) :
         return 'TVSP11'
-    if(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP12_Start and targetDate < TVSP13_Start) :
         return 'TVSP12'
-    if(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP13_Start and targetDate < TVSP14_Start) :
         return 'TVSP13'
-    if(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP14_Start and targetDate < TVSP15_Start) :
         return 'TVSP14'
-    if(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP15_Start and targetDate < TVSP16_Start) :
         return 'TVSP15'
-    if(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP16_Start and targetDate < TVSP17_Start) :
         return 'TVSP16'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP17_Start and targetDate < TVSP18_Start) :
         return 'TVSP17'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP18_Start and targetDate < TVSP19_Start) :
         return 'TVSP18'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP19_Start and targetDate < TVSP20_Start) :
         return 'TVSP19'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP20_Start and targetDate < TVSP21_Start) :
         return 'TVSP20'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP21_Start and targetDate < TVSP22_Start) :
         return 'TVSP21'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP22_Start and targetDate < TVSP23_Start) :
         return 'TVSP22'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP23_Start and targetDate < TVSP24_Start) :
         return 'TVSP23'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP24_Start and targetDate < TVSP25_Start) :
         return 'TVSP24'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP24_Start and targetDate < TVSP26_Start) :
         return 'TVSP25'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP26_Start and targetDate < TVSP27_Start) :
         return 'TVSP26'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP27_Start and targetDate < TVSP28_Start) :
         return 'TVSP27'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP28_Start and targetDate < TVSP29_Start) :
         return 'TVSP28'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP29_Start and targetDate < TVSP30_Start) :
         return 'TVSP29'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP30_Start and targetDate < TVSP31_Start) :
         return 'TVSP30'
-    elif(duedate >= '' and duedate <= '') :
+    elif(targetDate >= TVSP31_Start and targetDate < TVSP32_Start) :
         return 'TVSP31'
 
     return 'TVSP_UNDEF'
@@ -282,7 +316,8 @@ def getStatusSummary(jiraIssue) :
         return value
 
     #print("Status Summary = Null")
-    return None
+    #return None
+    return 'None'
 
 
 #===========================================================================
@@ -291,13 +326,14 @@ def getStatusSummary(jiraIssue) :
 # [return] str (RGB)
 #===========================================================================
 def getStatusColor(jiraIssue) :
-    value = jiraIssue.raw['fields']['customfield_15711']
-    if(value != None) :
-        #print("Status Color = ", json.dumps(value['value']))
-        return value['value']
+    statusColor = jiraIssue.raw['fields']['customfield_15711']
+    if(statusColor != None) :
+        #print("Status Color = ", json.dumps(statusColor['value']))
+        return statusColor['value']
 
     #print("Status Color = Null")
-    return None
+    #return None
+    return 'None'
 
 
 #===========================================================================
@@ -305,14 +341,15 @@ def getStatusColor(jiraIssue) :
 # [param] jiraIssue : json object of jira
 # [return] str (RGB)
 #===========================================================================
-def getSE_Dilivery(jiraIssue) :
-    value = jiraIssue.raw['fields']['customfield_16988']['value']
-    if(value != None) :
-        #print("SE_Delivery = ", json.dumps(value))
-        return value
+def getSE_Delivery(jiraIssue) :
+    delivery = jiraIssue.raw['fields']['customfield_16988']
+    if(delivery != None) :
+        #print("SE_Delivery = ", json.dumps(delivery))
+        return delivery['value']
 
     #print("SE_Delivery = Null")
-    return None
+    #return None
+    return 'None'
 
 
 #===========================================================================
@@ -321,14 +358,14 @@ def getSE_Dilivery(jiraIssue) :
 # [return] str (RGB)
 #===========================================================================
 def getSE_Quality(jiraIssue) :
-    value = jiraIssue.raw['fields']['customfield_16987']
-    if(value != None) :
-        value = value['value']
-        #print("SE_Quality = ", json.dumps(value))
-        return value
+    quality = jiraIssue.raw['fields']['customfield_16987']
+    if(quality != None) :
+        #print("SE_Quality = ", json.dumps(quality))
+        return quality['value']
 
     #print("SE_Quality = Null")
-    return None
+    #return None
+    return 'None'
 
 #===========================================================================
 # Get D_Comment of jira
@@ -364,7 +401,8 @@ def getSTEList(jiraIssue) :
         return value
 
     #print("STE_List[] = Null")
-    return None
+    #return None
+    return 'None'
 
 
 #===========================================================================
@@ -474,7 +512,8 @@ def getScopeOfChange(jiraIssue) :
         return value['value']
 
     #print("Scope of Change = Null")
-    return None
+    #return None
+    return 'None'
 
 
 #===========================================================================
@@ -504,7 +543,10 @@ def getReporter(jiraIssue) :
 # [return] str
 #===========================================================================
 def getAssignee(jiraIssue) :
-    value = jiraIssue.raw['fields']['assignee']['name']
+    value = "Unassigned"
+    if(jiraIssue.raw['fields']['assignee'] != None) :
+        value = jiraIssue.raw['fields']['assignee']['name']
+        return value
     #print("assignee = ", value)
     return value
 
@@ -543,7 +585,8 @@ def getEpicsMilestoneFromDesc(description, fieldtitle) :
         return result
 
     #print("getEpicsFromDesc = Null")
-    return None
+    #return None
+    return 'None'
 
 #####################################################################################################################
 # Exel Control
@@ -615,20 +658,27 @@ def getColumnIndex(Sheetname, row, title) :
 #===========================================================================
 def getInitiativeRowIndex(Sheetname, InitiativeKey) :
     isFound = False
-    for row_index in range(1, MAX_RowCount+1) :
-        type = str(Sheetname.cell(row = row_index, column = CI_IssueType).value).strip()
+    result = 0
+    type = 0
+    keyvalue = 0
+    #print("getInitiativeRowIndex = Max_RowCount = ", MAX_RowCount)
+    for row_index in range(3, MAX_RowCount+1) :
+        type = str(Sheetname.cell(row = row_index, column = 5).value).strip()
+        keyvalue = str(Sheetname.cell(row = row_index, column = 6).value).strip()
+        #print("######>>>>> row_index = {3}, Issue Type = {0}, KeyValue = {1}, Initiative Key = {2}".format(type, keyvalue, InitiativeKey, row_index))
         if(type == "Initiative") :
-            keyvalue = str(Sheetname.cell(row = row_index, column = CI_InitKey).value).strip()
-            if(keyvalue == InitiativeKey) :
+            keyvalue = str(Sheetname.cell(row = row_index, column = 6).value).strip()
+            if(keyvalue == InitiativeKey.strip()) :
                 isFound = True
-                #print("Found Initiative Key of ", Sheetname, " : Key = ", InitiativeKey, ", Index = ", row_index)
+                result = row_index
+                #print("Found Initiative Key of ", Sheetname, " : Key = ", InitiativeKey, " keyvalue = ", keyvalue, " Index = ", row_index)
                 break;
 
     if(isFound == False) :
-        #print("Not Found Initiative Key of ", Sheetname, " : Key = ", InitiativeKey, ", Index = ", row_index)
-        row_index = 0
+        #print("Not Found Initiative Key of ", Sheetname, " : Key = ",InitiativeKey, " keyvalue = ", keyvalue, " Index = ", result, " Type = ", type)
+        result = 0
 
-    return row_index
+    return result
 
 
 
@@ -641,20 +691,24 @@ def getInitiativeRowIndex(Sheetname, InitiativeKey) :
 #===========================================================================
 def getEpicRowIndex(Sheetname, EpicKey) :
     isFound = False
-    for row_index in range(1, MAX_RowCount+1) :
+    result = 0
+    type = 0
+    #print("getEpicRowIndex = Max_RowCount = ", MAX_RowCount)
+    for row_index in range(3, MAX_RowCount+1) :
         type = str(Sheetname.cell(row = row_index, column = CI_IssueType).value).strip()
         if(type == "EPIC") :
             keyvalue = str(Sheetname.cell(row = row_index, column = CI_EpicKey).value).strip()
             if(keyvalue == EpicKey) :
                 isFound = True
-                #print("Found Epic Key of ", Sheetname, " : Key = ", EpicKey, ", Index = ", row_index)
+                result = row_index
+                print("Found Epic Key of ", Sheetname, " : Key = ", EpicKey, ", Index = ", row_index)
                 break;
 
     if(isFound == False) :
-        #print("Not Found Epic Key of ", Sheetname, " : Key = ", EpicKey, ", Index = ", row_index)
-        row_index = 0
+        print("Not Found Epic Key of ", Sheetname, " : Key = ", EpicKey, ", Index = ", result)
+        result = 0
 
-    return row_index
+    return result
 
 
 #===========================================================================
@@ -682,6 +736,8 @@ def getTitleListfromXls(Sheetname, row, col) :
 #===========================================================================
 def getInitiativeKeylistFromXls(Sheetname, row) :
     initative_key = []
+
+    #print("getInitiativeKeylistFromXls = Max_RowCount = ", MAX_RowCount)
     for row_index in range(row, MAX_RowCount+1) :
         type = str(Sheetname.cell(row = row_index, column = CI_IssueType).value).strip()
         if(type == "Initiative") :
@@ -699,6 +755,7 @@ def getInitiativeKeylistFromXls(Sheetname, row) :
 #===========================================================================
 def getEpicKeyListfromXls(Sheetname, row) :
     epic_key = []
+    #print("getEpicKeyListfromXls = Max_RowCount = ", MAX_RowCount)
     for row_index in range(row, MAX_RowCount+1) :
         type = str(Sheetname.cell(row = row_index, column = CI_IssueType).value).strip()
         if(type == "EPIC") :
@@ -716,16 +773,17 @@ def getEpicKeyListfromXls(Sheetname, row) :
 # [param] KeyID : Initiative or Epic Key to get Sprint History from excel
 # [return] Sprint_Info{ 'SP16_1' : '', 'SP16_2' : '', .... }
 #===========================================================================
-def getSprintHistoryfromXls(Sheetname, KeyID, IssueType) :
+def getSprintHistoryfromXls(Sheetname, KeyID, IssueType, rowIndex) :
     Sprint_Info = { }
     Sprint_Info = copy.deepcopy(default_Sprint_Info)
-
+    '''
     if(IssueType == "Initiative") :
         rowIndex = getInitiativeRowIndex(Sheetname, KeyID)
     elif (IssueType == "EPIC") :
         rowIndex = getEpicRowIndex(Sheetname, KeyID)
     else :
         pass
+    '''
 
     if(rowIndex == 0) :
         pass
@@ -749,20 +807,34 @@ def getSprintHistoryfromXls(Sheetname, KeyID, IssueType) :
 # Get Epic Information from Excel
 # [param] Sheetname : Excel Sheet handle
 # [param] EpicKey : Epic Key to get detail information from excel
-# [return] epic_info { 'key' : '', 'summary' : '', Sprint_Info{ 'SP16_1' : '', 'SP16_2' : '', .... } }
+# [return] epic_info { 'key' : '', 'summary' : '', Sprint_Info{ 'SP16_1' : '', 'SP16_2' : '', .... } } or None
 #===========================================================================
 def getEpicInfofromXls(Sheetname, EpicKey) :
     epic_info = { }
+    bfound = False
+    getEpicKey = 0
+    epic_info = copy.deepcopy(default_epic_info)
+    #print("getEpicInfofromXls = Max_RowCount = ", MAX_RowCount)
     for row_index in range(1, MAX_RowCount+1) :
-        epic_info = copy.deepcopy(default_epic_info)
         getEpicKey = str(Sheetname.cell(row = row_index, column = CI_EpicKey).value).strip()
-        epic_info["Release_SP"] = str(Sheetname.cell(row = row_index, column = CI_ReleaseSP).value).strip()
 
         if(getEpicKey == EpicKey) :
+            #print("&&&&&&&&&&&&&&&  getEpicKey = {0} == EpicKey = {1}".format(getEpicKey, EpicKey))
             epic_info['Epic Key'] = getEpicKey
-            spInfo = getSprintHistoryfromXls(cur_sheet, getEpicKey, "EPIC")
+            epic_info['Release_SP'] = str(Sheetname.cell(row = row_index, column = CI_ReleaseSP).value).strip()
+            spInfo = getSprintHistoryfromXls(Sheetname, getEpicKey, "EPIC", row_index)
             epic_info['TVSP'] = spInfo
+            bfound = True
 
+    if(bfound == True) :
+        #print(epic_info)
+        #log.write("\n@@ Epic Key = {0}\n".format(EpicKey))
+        pass
+    else :
+        epic_info['Epic Key'] = EpicKey
+        #log.write("\n@@ Not found Epic Key from xls = {0}\n".format(EpicKey))
+
+    log.write(str(epic_info))
     return epic_info
 
 
@@ -775,6 +847,7 @@ def getEpicInfofromXls(Sheetname, EpicKey) :
 def getInitiativeAllEpicsListfromXls(Sheetname) :
     epic_key = []
     keylist = getInitiativeKeylistFromXls(Sheetname, 3)
+    #print("getInitiativeAllEpicsListfromXls = Max_RowCount = ", MAX_RowCount)
 
     for keyID in keylist :
         tmp = { 'key' : '', 'epiclist' : []}
@@ -799,6 +872,7 @@ def getInitiativeAllEpicsListfromXls(Sheetname) :
 #===========================================================================
 def getInitiativeEpicListsfromXls(Sheetname, InitiativeKey) :
     epic_key = []
+    #print("getInitiativeEpicListsfromXls = Max_RowCount = ", MAX_RowCount)
     for row_index in range(1, MAX_RowCount+1) :
         type = str(Sheetname.cell(row = row_index, column = CI_IssueType).value).strip()
         getInitkey = str(Sheetname.cell(row = row_index, column = CI_InitKey).value).strip()
@@ -817,11 +891,15 @@ def getInitiativeEpicListsfromXls(Sheetname, InitiativeKey) :
 # [param] col : column
 # [return] None
 #===========================================================================
-def setXlsCell(Sheetname, row, col, value) :
-    #Sheetname.cell(row=row, column=col).font = myfont
-    #Sheetname.cell(row=row, column=col).alignment = myalignment
-    #Sheetname.cell(row=row, column=col).fill = myfill
-    #Sheetname.cell(row=row, column=col).border = myborder
+def setXlsCell(Sheetname, row, col, value, format, link) :
+    if(format == True) :
+        Sheetname.cell(row=row, column=col).font = myfont
+        Sheetname.cell(row=row, column=col).alignment = myalignment
+        Sheetname.cell(row=row, column=col).fill = myfill
+        Sheetname.cell(row=row, column=col).border = myborder
+
+    if(link != None) :
+        Sheetname.cell(row=row, column=col).hyperlink = link
 
     Sheetname.cell(row=row, column=col).value = value
 
@@ -845,12 +923,12 @@ def getXlsCell(Sheetname, row, col) :
 # [return] Initiative Key List[ 'KEY1', 'KEY2', ... ]
 #===========================================================================
 def getInitiativeKeylistFromJira(filterResult) :
-    initative_key = []
+    initiative_key = []
     for issue in filterResult :
         initiative_key.append(getKey(issue))
 
     #print("Initiative Key List from Jira = ", initative_key)
-    return initative_key
+    return initiative_key
 
 
 
@@ -930,15 +1008,14 @@ def getEpicKeyListfromJira(filterResult, rawData) :
 # [return] EpicList[ 'Epic Key1', 'Epic Key2', ... ]
 #===========================================================================
 def getInitiativeEpicListsfromJira(jiraAllEpicList, InitiativeKey) :
-    epic_key = []
 
     for item in jiraAllEpicList :
         if (InitiativeKey == item['key']) :
-            epic_key.append(item['epiclist'])
+            return item['epiclist']
 
     #print("*********** Initiative Key = {0} Epic key from JIRA **********************".format(InitiativeKey))
     #print(epic_key)
-    return epic_key
+    return []
 
 
 
@@ -952,28 +1029,29 @@ def getInitiativeEpicListsfromJira(jiraAllEpicList, InitiativeKey) :
 def getInitiativeDetailInfofromXls(Sheetname, IntiativeKeyList, Init_EpicList) :
     result = []
     initiative_info = {}
-
     for key in IntiativeKeyList :
         initiative_info = copy.deepcopy(default_initiative_info)
         rowIndex = getInitiativeRowIndex(Sheetname, key)
 
         if(rowIndex > 0) :
-            print("\n######## {0} row - Update Initiative Detail information from Xls".format(rowIndex))
+            #print("\n######## {0} row - Update Initiative Detail information from Xls".format(rowIndex))
             initiative_info["Initiative Key"] = str(Sheetname.cell(row = rowIndex, column = CI_InitKey).value).strip()
             initiative_info["Release_SP"] = str(Sheetname.cell(row = rowIndex, column = CI_ReleaseSP).value).strip()
             initiative_info["관리대상"] = str(Sheetname.cell(row = rowIndex, column = 2).value).strip()
             initiative_info["Risk 관리 대상"] = str(Sheetname.cell(row = rowIndex, column = 3).value).strip()
 
             #SP
-            spInfo = getSprintHistoryfromXls(cur_sheet, key, "Initiative")
+            spInfo = getSprintHistoryfromXls(Sheetname, key, "Initiative", rowIndex)
             initiative_info['TVSP'] = spInfo
 
             #EPIC
             epic_list = getInitiativeEpicListsfromJira(Init_EpicList, key)
+            #print("<<<<<<<<<< Initiative Key = {0}, Epic List = {1} >>>>>>>>>>>>>>>>>".format(key, epic_list))
             for epickey in epic_list :
                 # epic_info = { 'Epic Key' : '', 'Summary' : '', Sprint_Info{ 'SP16_1' : '', 'SP16_2' : '', .... } }
-                epicInfo = getEpicInfofromXls(cur_sheet, epickey)
-                initiative_info['EPIC'].append(epicInfo)
+                epicInfo = getEpicInfofromXls(Sheetname, epickey)
+                if(epicInfo != None) :
+                    initiative_info['EPIC'].append(epicInfo)
 
             result.append(initiative_info)
             #print(initiative_info)
@@ -1018,40 +1096,46 @@ def getInitiativeDetailInfofromXls(Sheetname, IntiativeKeyList, Init_EpicList) :
 # [return] Final Data : all initiative_info list []
 #===========================================================================
 def getInitiativeDetailInfofromJira(Initiative_FilterResult, Epic_FilterResult, finalinfo) :
+    resultDB = []
 
     for initiative in finalinfo :
         dissue = getJiraInfo(Initiative_FilterResult, initiative['Initiative Key'])
-        if(dissue != None) :
+        #print("#######>>> Initative Key = ", initiative['Initiative Key'])
+        if(dissue) :
             initiative['Summary'] = getSummary(dissue)
             initiative['Assignee'] = getAssignee(dissue)
             initiative['Status'] = getStatus(dissue)
             initiative['CreatedDate'] = getCreatedDate(dissue)
             initiative['Initiative Order'] = getInitiativeOrder(dissue)
             initiative['Status Color'] = getStatusColor(dissue)
-            initiative['SE_Delivery'] = getSE_Dilivery(dissue)
+            initiative['SE_Delivery'] = getSE_Delivery(dissue)
             initiative['SE_Quality'] = getSE_Quality(dissue)
             initiative['ScopeOfChange'] = getScopeOfChange(dissue)
-            initiative['TVSP'][updateSP] = getReleaseSprint(issue) #duedate 기반 SP 정보 기입 (Release Sprint 값 적용)
+            initiative['TVSP'][updateSP] = getReleaseSprint(dissue) #duedate 기반 SP 정보 기입 (Release Sprint 값 적용)
             initiative['EpicCnt'] = len(initiative['EPIC'])
             initiative['EpicResolutionRate'] = 0
             initiative['StoryResolutionRate'] = 0
 
             for epic in initiative['EPIC'] :
+                #print("#######>>> Epic Key = ", epic['Epic Key'])
+                log.write("\n#######>>> Epic Key = {0} ".format(epic['Epic Key']))
                 epicissue = getJiraInfo(Epic_FilterResult, epic['Epic Key'])
-                if(epicissue != None) :
-                    epic['EPIC']['Summary'] = getSummary(epicissue)
-                    epic['EPIC']['Assignee'] = getAssignee(epicissue)
-                    epic['EPIC']['Status'] = getStatus(epicissue)
-                    epic['EPIC']['CreatedDate'] = getCreatedDate(epicissue)
-                    epic['EPIC']['TVSP'][updateSP] = conversionDuedateToSprint(epic['EPIC']['duedate'])
-                    epic['EPIC']['duedate'] = getDueDate(epicissue)
-                    epic['EPIC']['StroyCnt'] = 0
-                    epic['EPIC']['StoryResolutionRate'] = 0
+                if(epicissue) :
+                    epic['Summary'] = getSummary(epicissue)
+                    epic['Assignee'] = getAssignee(epicissue)
+                    epic['Status'] = getStatus(epicissue)
+                    epic['CreatedDate'] = getCreatedDate(epicissue)
+                    epic['TVSP'][updateSP] = conversionDuedateToSprint(getDueDate(epicissue))
+                    epic['duedate'] = getDueDate(epicissue)
+                    epic['StroyCnt'] = 0
+                    epic['StoryResolutionRate'] = 0
+            #print(initiative)
+            resultDB.append(initiative)
         else :
             print("Can't find Initiative or Epic Key from JIRA Filter Result.")
             pass
 
-    return finalinfo
+    return resultDB
 
 
 #===========================================================================
@@ -1064,7 +1148,7 @@ def getJiraInfo(filterResult, KeyID) :
     for dissue in filterResult :
         if(KeyID == getKey(dissue)) :
             return dissue
-    return None
+    return False
 
 
 
@@ -1083,7 +1167,8 @@ def getFilteredInitiativeInfofromJira(jiraHandle, filterid) :
     if(Initiative_webOS45_Initial_Dev == 42101) :
         result = getFilterIDResult(jiraHandle, Initiative_webOS45_Initial_Dev)
     else :
-        setfield = ('summary, comment, assignee, duedate, created, labels')
+        #setfield = ('summary, assignee, duedate, created, labels, status')
+        setfield = ['summary', 'assignee', 'duedate', 'created', 'labels', 'status', ]
         result = getFilterIDResult(jiraHandle, Initiative_webOS45_Initial_Dev, setfield)
 
     return result
@@ -1154,36 +1239,37 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
     col_index = 1
     index = 1
     for initiative in finalinfo :
+        initlinkinfo = "http://hlm.lge.com/issue/browse/"+str(initiative['Initiative Key'])
         # write No Column
-        setXlsCell(Sheetname, row_index, 1).value = index
+        setXlsCell(Sheetname, row_index, 1, index, False, None)
 
         # write Initiative Order
-        setXlsCell(Sheetname, row_index, 2).value = initiative['Initiative Order']
+        setXlsCell(Sheetname, row_index, 4, initiative['Initiative Order'], False, None)
         # write Issue Type
-        setXlsCell(Sheetname, row_index, 3).value = 'Initiative'
+        setXlsCell(Sheetname, row_index, 5, 'Initiative', False, None)
         # write Initiative Key
-        setXlsCell(Sheetname, row_index, 4).value = initiative['Initiative Key']
+        setXlsCell(Sheetname, row_index, 6, initiative['Initiative Key'], False, initlinkinfo)
         # write Epic Key
-        setXlsCell(Sheetname, row_index, 5).value = initiative['Initiative Key']
+        setXlsCell(Sheetname, row_index, 7, initiative['Initiative Key'], False, initlinkinfo)
         # write Summary
-        setXlsCell(Sheetname, row_index, 6).value = initiative['Summary']
+        setXlsCell(Sheetname, row_index, 8, initiative['Summary'], False, None)
 
         # write Assignee
-        setXlsCell(Sheetname, row_index, 7).value = initiative['Assignee']
+        setXlsCell(Sheetname, row_index, 10, initiative['Assignee'], False, None)
         # write Status
-        setXlsCell(Sheetname, row_index, 8).value = initiative['Status']
+        setXlsCell(Sheetname, row_index, 13, initiative['Status'], False, None)
         # write CreatedDate
-        setXlsCell(Sheetname, row_index, 9).value = initiative['CreatedDate']
+        setXlsCell(Sheetname, row_index, 14, initiative['CreatedDate'], False, None)
         # write Release Sprint
-        setXlsCell(Sheetname, row_index, 10).value = initiative['Release_SP']
+        setXlsCell(Sheetname, row_index, 15, initiative['Release_SP'], False, None)
         # write SP
-        for key, value in initiative['SP'].items() :
-            colpos = getColumnIndex(Sheetname, key)
-            setXlsCell(Sheetname, row_index, colpos).value = value
+        for key, value in initiative['TVSP'].items() :
+            colpos = getColumnIndex(Sheetname, 2, key)
+            setXlsCell(Sheetname, row_index, colpos, value, False, None)
 
         '''
         initiative['Status Color'] = getStatusColor(dissue)
-        initiative['SE_Delivery'] = getSE_Dilivery(dissue)
+        initiative['SE_Delivery'] = getSE_Delivery(dissue)
         initiative['SE_Quality'] = getSE_Quality(dissue)
         initiative['ScopeOfChange'] = getScopeOfChange(dissue)
         initiative['TVSP']['updateSP'] = getReleaseSprint(issue) #duedate 기반 SP 정보 기입 (Release Sprint 값 적용)
@@ -1195,31 +1281,33 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
         row_index += 1
         index += 1
         for epic in initiative['EPIC'] :
+            initlinkinfo = "http://hlm.lge.com/issue/browse/"+str(initiative['Initiative Key'])
+            epiclinkinfo = "http://hlm.lge.com/issue/browse/"+str(epic['Epic Key'])
             # write No Column
-            setXlsCell(Sheetname, row_index, 1).value = index
+            setXlsCell(Sheetname, row_index, 1, index, False, None)
 
             # write Initiative Order
-            setXlsCell(Sheetname, row_index, 2).value = initiative['Initiative Order']
+            setXlsCell(Sheetname, row_index, 4, initiative['Initiative Order'], False, None)
             # write Issue Type
-            setXlsCell(Sheetname, row_index, 3).value = 'EPIC'
+            setXlsCell(Sheetname, row_index, 5, 'EPIC', False, None)
             # write Initiative Key
-            setXlsCell(Sheetname, row_index, 4).value = initiative['Initiative Key']
+            setXlsCell(Sheetname, row_index, 6, initiative['Initiative Key'], False, initlinkinfo)
             # write Epic Key
-            setXlsCell(Sheetname, row_index, 5).value = epic['Epic Key']
+            setXlsCell(Sheetname, row_index, 7, epic['Epic Key'], False, epiclinkinfo)
             # write Summary
-            setXlsCell(Sheetname, row_index, 6).value = epic['Summary']
+            setXlsCell(Sheetname, row_index, 8, epic['Summary'], False, None)
             # write Assignee
-            setXlsCell(Sheetname, row_index, 7).value = epic['Assignee']
+            setXlsCell(Sheetname, row_index, 10, epic['Assignee'], False, None)
             # write Status
-            setXlsCell(Sheetname, row_index, 8).value = epic['Status']
+            setXlsCell(Sheetname, row_index, 13, epic['Status'], False, None)
             # write CreatedDate
-            setXlsCell(Sheetname, row_index, 9).value = epic['CreatedDate']
+            setXlsCell(Sheetname, row_index, 14, epic['CreatedDate'], False, None)
             # write Release Sprint
-            setXlsCell(Sheetname, row_index, 10).value = epic['Release_SP']
+            setXlsCell(Sheetname, row_index, 15, epic['Release_SP'], False, None)
             # write SP
-            for key, value in epic['SP'].items() :
-                colpos = getColumnIndex(Sheetname, key)
-                setXlsCell(Sheetname, row_index, colpos).value = value
+            for key, value in epic['TVSP'].items() :
+                colpos = getColumnIndex(Sheetname, 2, key)
+                setXlsCell(Sheetname, row_index, colpos, value, False, None)
 
             '''
             epic['EPIC']['TVSP'][updateSP] = conversionDuedateToSprint(epic['EPIC']['duedate'])
@@ -1243,7 +1331,7 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
 def prepareNewXlsSheet(Sheetname, start_row, start_col) :
     for x in range(start_row, maxResultCnt) :
         for y in range(start_col, 50) :
-            setXlsCell(Sheetname, x, y, '')
+            setXlsCell(Sheetname, x, y, '', False, None)
 
 
 
@@ -1254,7 +1342,7 @@ def prepareNewXlsSheet(Sheetname, start_row, start_col) :
 #===========================================================================
 if __name__ == "__main__" :
     # jira Handle open
-    #dev_jira = JIRA(DevTracker, basic_auth = ("sungbin.na", ""))
+    dev_jira = JIRA(DevTracker, basic_auth = ("sungbin.na", "Sungbin@1805"))
 
     # create log file
     if (os.path.isfile("Initiative_logfile.txt")) :
@@ -1263,7 +1351,7 @@ if __name__ == "__main__" :
     log = open('Initiative_logfile.txt', 'wt')
 
     # Create Excel workbook
-    workbook = xlsrd.load_workbook('Initiative일정관리_180426_v1.xlsx')
+    workbook = xlsrd.load_workbook('Initiative일정관리_180504_v1.xlsx')
     org_sheet = workbook["최종"]
 
     workbook.copy_worksheet(org_sheet)
@@ -1271,11 +1359,10 @@ if __name__ == "__main__" :
     #print(workbook.get_sheet_names())
     cur_sheet.title = "금일작업본"
 
-    prepareNewXlsSheet(cur_sheet, 3, 1)
-
     # set max row/column count
     MAX_RowCount = getRowCount(cur_sheet, 3, 1)
     MAX_ColCount = getColumnCount(cur_sheet, 2, 1)
+    log.write("# Max_RowCount = {0}, MAX_ColCount = {1}".format(MAX_RowCount, MAX_ColCount))
 
     # set title column index to variables
     CI_IssueType = getColumnIndex(cur_sheet, 2, "Type")
@@ -1289,71 +1376,128 @@ if __name__ == "__main__" :
     CI_Status = getColumnIndex(cur_sheet, 2, "Status")
     CI_Created = getColumnIndex(cur_sheet, 2, "CreatedDate")
     CI_InitOrder = getColumnIndex(cur_sheet, 2, "Initiative Order")
+    #print("Type = {0}, Epic Key = {1}, Initiative Key = {2}, Release_SP = {3}".format(CI_IssueType, CI_EpicKey, CI_InitKey, CI_ReleaseSP))
+
+    TVSP11_Start = conversionCreatedDateToDatetime("2018-1-15")
+    TVSP12_Start = conversionCreatedDateToDatetime("2018-1-29")
+    TVSP13_Start = conversionCreatedDateToDatetime("2018-2-12")
+    TVSP14_Start = conversionCreatedDateToDatetime("2018-2-26")
+    TVSP15_Start = conversionCreatedDateToDatetime("2018-3-12")
+    TVSP16_Start = conversionCreatedDateToDatetime("2018-4-2")
+    TVSP17_Start = conversionCreatedDateToDatetime("2018-4-16")
+    TVSP18_Start = conversionCreatedDateToDatetime("2018-4-30")
+    TVSP19_Start = conversionCreatedDateToDatetime("2018-5-14")
+    TVSP20_Start = conversionCreatedDateToDatetime("2018-5-28")
+    TVSP21_Start = conversionCreatedDateToDatetime("2018-6-11")
+    TVSP22_Start = conversionCreatedDateToDatetime("2018-6-25")
+    TVSP23_Start = conversionCreatedDateToDatetime("2018-7-9")
+    TVSP24_Start = conversionCreatedDateToDatetime("2018-7-23")
+    TVSP25_Start = conversionCreatedDateToDatetime("2018-8-6")
+    TVSP26_Start = conversionCreatedDateToDatetime("2018-8-20")
+    TVSP27_Start = conversionCreatedDateToDatetime("2018-9-3")
+    TVSP28_Start = conversionCreatedDateToDatetime("2018-9-17")
+    TVSP29_Start = conversionCreatedDateToDatetime("2018-10-1")
+    TVSP30_Start = conversionCreatedDateToDatetime("2018-10-15")
+    TVSP31_Start = conversionCreatedDateToDatetime("2018-10-29")
+    TVSP32_Start = conversionCreatedDateToDatetime("2018-11-12")
+
+    #getInitiativeRowIndex(cur_sheet, 'TVPLAT-874')
 
 
     # Initiative ========================================================================
     # 1. JIRA에서 Initiative Filter에 맞는 Initiative Key를 Jira로 구성한다. [ 'key1', 'key2', .... ]
+    log.write("\n\n# 1. JIRA에서 Initiative Filter에 맞는 Initiative Key를 Jira로 구성한다. [ 'key1', 'key2', .... ]\n")
     Initiative_FilterResult = getFilteredInitiativeInfofromJira(dev_jira, 42101)
     jira_initiative_keylist = getInitiativeKeylistFromJira(Initiative_FilterResult)
 
     # 2. Excel로 부터 Initiative Key List를 구성한다. [ 'key1', 'key2', .... ]
+    log.write("\n\n# 2. Excel로 부터 Initiative Key List를 구성한다. [ 'key1', 'key2', .... ]\n")
     xls_initiative_keylist = getInitiativeKeylistFromXls(cur_sheet, 3)
 
     # 3. Jira상의 Initiative Key List와 엑셀상에 관리되는 Initiative Key List를 비교한다.
+    log.write("\n\n# 3. Jira상의 Initiative Key List와 엑셀상에 관리되는 Initiative Key List를 비교한다.\n")
+    log.write("\n################## New Initiative List (JIRA - Excel) ##################\n")
     print("\n################## New Initiative List (JIRA - Excel) ##################")
     newkey = getDiffList(jira_initiative_keylist, xls_initiative_keylist)
-    print(newkey)
+    #print(newkey)
+    log.write(str(newkey))
     print("\n################## Del Initiative List (Excel - JIRA) ##################")
+    log.write("\n################## Del Initiative List (Excel - JIRA) ##################\n")
     delkey = getDiffList(xls_initiative_keylist, jira_initiative_keylist)
-    print(delkey)
+    #print(delkey)
+    log.write(str(delkey))
 
 
     # Epic ==============================================================================
     # 4. JIRA에서 Initative IssueLinks 정보에서 Epic Key List를 구성한다. [ 'key1', 'key2', .... ]
+    log.write("\n\n# 4. JIRA에서 Initative IssueLinks 정보에서 Epic Key List를 구성한다. [ 'key1', 'key2', .... ]\n")
     jira_Issuelinks_epic_keylist = getEpicKeyListfromJira(Initiative_FilterResult, "Initiative_Filter")
 
     # 5. JIRA에서 Epic Filter에 맞는 Epic Key List를 구성한다. [ 'key1', 'key2', .... ]
+    log.write("\n\n# 5. JIRA에서 Epic Filter에 맞는 Epic Key List를 구성한다. [ 'key1', 'key2', .... ]\n")
     Epic_FilterResult = getFilteredInitiativeInfofromJira(dev_jira, 42317)
     jira_epic_keylist = getEpicKeyListfromJira(Epic_FilterResult, "Epic_Filter")
     xls_epic_keylist = getEpicKeyListfromXls(cur_sheet, 3)
+    log.write("\nEpic : Jira = {0} EA, Excel = {1} EA\n".format(len(jira_epic_keylist), len(xls_epic_keylist)))
 
     # 6. JIRA에서 Epic Filter를 이용해 구성한 정보와 Initiative Issuelinks[] 정보를 이용해 만든 Epic Key List가 일치하는지를 체크한다. [ 'key1', 'key2', .... ]
+    log.write("\n\n# 6. JIRA에서 Epic Filter를 이용해 구성한 정보와 Initiative Issuelinks[] 정보를 이용해 만든 Epic Key List가 일치하는지를 체크한다. [ 'key1', 'key2', .... ]\n")
+    log.write("\n################## Compare1 Epic List (jira filter - jira link) ##################\n")
     print("\n################## Compare1 Epic List (jira filter - jira link) ##################")
     new_issuelinks_epickey = getDiffList(jira_epic_keylist, jira_Issuelinks_epic_keylist)
-    print(new_issuelinks_epickey)
+    #print(new_issuelinks_epickey)
+    log.write(str(new_issuelinks_epickey))
+    log.write("\n################## Compare2 Epic List (jira link - jira filter) ##################\n")
     print("\n################## Compare2 Epic List (jira link - jira filter) ##################")
     new_filtered_epickey = getDiffList(jira_Issuelinks_epic_keylist, jira_epic_keylist)
-    print(new_filtered_epickey)
+    #print(new_filtered_epickey)
+    log.write(str(new_filtered_epickey))
 
+    log.write("\n################## New Epic List (JIRA - Excel) ##################\n")
     print("\n################## New Epic List (JIRA - Excel) ##################")
     newEpickey = getDiffList(jira_Issuelinks_epic_keylist, xls_epic_keylist)
-    print(newEpickey)
+    #print(newEpickey)
+    log.write(str(newEpickey))
+    log.write("\n################## Del Epic List (Excel - JIRA) ##################\n")
     print("\n################## Del Epic List (Excel - JIRA) ##################")
     delEpickey = getDiffList(xls_epic_keylist, jira_Issuelinks_epic_keylist)
-    print(delEpickey)
+    log.write(str(delEpickey))
+    #print(delEpickey)
 
     # 7. 각 Initiative 하위에 존재하는 Epick List 구성
+    log.write("\n\n# 7. 각 Initiative 하위에 존재하는 Epick List 구성\n")
     # list[ { 'key' : 'Initative Key',  'epiclist' : [ 'Epic Key1', 'Epic Key2', ... ]}, ....  ]
+    print("\n################## Prepare Initative - Epic List from Jira ##################")
     jira_Init_EpicLists = getInitiativeAllEpicsListfromJira(Initiative_FilterResult)
+    #print(jira_Init_EpicLists)
+    log.write(str(jira_Init_EpicLists))
 
 
     # 8. Jira로 부터 얻은 Initiative Key를 가지고 엑셀의 정보를 먼저 Update 한다. (Jira 기준 - Initative Key List[])
     #    Update Detail Initative(Epic) Information from Excel first.
     #    (Release SP, SP History, 관리대상, 관리대상 Risk, ?Epic List?)
+    log.write("\n\n# 8. Jira로 부터 얻은 Initiative Key를 가지고 엑셀의 정보를 먼저 Update 한다. (Jira 기준 - Initative Key List[])\n")
+    print("\n################## Prepare Initative DB : Update History Data from Excel ##################")
     tmp_Initiative = getInitiativeDetailInfofromXls(cur_sheet, jira_initiative_keylist, jira_Init_EpicLists)
+    #print(tmp_Initiative)
+    log.write(str(tmp_Initiative))
 
 
-    # 8. Initiative Key를 기준으로 Jira상의 최신 정보를 Update한다.
-    finalInfo = getInitiativeDetailInfofromJira(Initiative_FilterResult, Epic_FilterResult, tmp_Initiative)
+    # 9. Initiative Key를 기준으로 Jira상의 최신 정보를 Update한다.
+    log.write("\n\n# 9. Initiative Key를 기준으로 Jira상의 최신 정보를 Update한다.\n")
+    print("\n################## Update Initative DB : Update Latest Data from Jira ##################\n")
+    finalDB = getInitiativeDetailInfofromJira(Initiative_FilterResult, Epic_FilterResult, tmp_Initiative)
+    #print(finalDB)
+    log.write(str(finalDB))
 
-
-    # 9. Jira로 부터 얻은 Initiative Key를 기준으로 Jira상의 최신 정보를 Excel 문서에 Update 한다.
+    # 10. Jira로 부터 얻은 Initiative Key를 기준으로 Jira상의 최신 정보를 Excel 문서에 Update 한다.
+    log.write("\n\n# 10. Jira로 부터 얻은 Initiative Key를 기준으로 Jira상의 최신 정보를 Excel 문서에 Update 한다.\n")
+    print("\n################## Make New Sheet and Clear Excel Area ##################")
     prepareNewXlsSheet(cur_sheet, 3, 1)
-    updateInitiativeDetailInfoToXls(finalInfo)
+    print("\n################## Write Final DB Info to Excel Sheet ##################")
+    updateInitiativeDetailInfoToXls(cur_sheet, finalDB)
 
-    # 10. Jira상의 최신 정보를 Excel 문서에 Update 후 별도 Excel File로 저장한다.
-    workbook.save('Initiative일정관리_180426_v2.xlsx')
-
-    '''
-    #log.write(a)
-    '''
+    # 11. Jira상의 최신 정보를 Excel 문서에 Update 후 별도 Excel File로 저장한다.
+    log.write("\n\n# 11. Jira상의 최신 정보를 Excel 문서에 Update 후 별도 Excel File로 저장한다.\n")
+    print("\n################## Save Excel Sheet ##################")
+    workbook.save('Initiative일정관리_180504_Update.xlsx')
