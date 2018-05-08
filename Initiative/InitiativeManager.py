@@ -41,8 +41,8 @@ DevTracker = 'http://hlm.lge.com/issue'
 QTracker = 'http://hlm.lge.com/qi'
 
 startSP = 'TVSP16_1'
-endSP = 'TVSP17_2'
-updateSP = 'TVSP18_1'
+endSP = 'TVSP18_1'
+updateSP = 'TVSP18_2'
 
 default_Sprint_Info = {
     'TVSP16_1' : '',  'TVSP16_2' : '',  'TVSP17_1' : '',  'TVSP17_2' : '',
@@ -307,6 +307,30 @@ def conversionDuedateToSprint(duedate) :
     elif(targetDate >= TVSP32_Start) :
         return 'TVSP32이후항목'
 
+
+
+#===========================================================================
+# convert ReleaseSprint to ShortSprint
+# [param] duedate : duedate
+# [return] Sprint str
+#===========================================================================
+def conversionReleaseSprintToSprint(ReleaseSprint) :
+    GL2_IR3TVSP19(5/14-5/25)
+    GL2_IR3TVSP22(6/25-7/6)
+    GL2_IR3TVSP23_Hardening(7/9-7/20)
+    GL2_IR3TVSP20(5/28-6/8)
+    GL2_IR4TVSP26(8/20-8/31)
+    GL2_IR3TVSP21(6/11-6/22)
+    GL2_IR3TVSP17(4/16-4/27)
+    GL2_IR3TVSP18(4/30-5/11)
+    GL2_IR4TVSP25(8/6-8/17)
+    GL2_IR2TVSP15_Hardening(3/12-3/30)
+    GL2_IR4TVSP24(7/23-8/3)
+    GL2_IR3TVSP16(4/2-4/13)
+    GL2_IR4TVSP29(10/1-10/12)
+    GL2_IR2TVSP11(1/15-1/26)
+    FC2_TVSP20(8/14-8/25)
+    pass
 
 
 #===========================================================================
@@ -1172,7 +1196,7 @@ def getInitiativeDetailInfofromJira(Initiative_FilterResult, Epic_FilterResult, 
             initiative['SE_Delivery'] = getSE_Delivery(dissue)
             initiative['SE_Quality'] = getSE_Quality(dissue)
             initiative['ScopeOfChange'] = getScopeOfChange(dissue)
-            initiative['TVSP'][updateSP] = getReleaseSprint(dissue) #duedate 기반 SP 정보 기입 (Release Sprint 값 적용)
+            initiative['TVSP'][updateSP] = conversionReleaseSprintToSprint(getReleaseSprint(dissue)) #duedate 기반 SP 정보 기입 (Release Sprint 값 적용)
             initiative['EpicCnt'] = len(initiative['EPIC'])
             initiative['EpicResolutionCnt'] = getChildEpicResolvedCntfromJira(dissue)
             initiative['StoryCnt'] = 0
@@ -1191,12 +1215,13 @@ def getInitiativeDetailInfofromJira(Initiative_FilterResult, Epic_FilterResult, 
                     epic['duedate'] = getDueDate(epicissue)
 
                     sql = "'Epic Link' = " + epic['Epic Key']
-                    storyissue = getFilterQueryResult(dev_jira, sql, getFieldList=None)
+                    setfield = [ 'status' ]
+                    storyissue = getFilterQueryResult(dev_jira, sql, getFieldList=setfield)
                     epic['STORY'] = getStorynTaskKeyListfromJira(storyissue)
 
-                    epic['StroyCnt'] = len(epic['STORY'])
+                    epic['StoryCnt'] = len(epic['STORY'])
                     epic['StoryResolutionCnt'] = getChildStorynTaskResolvedCntfromJira(storyissue)
-                    initiative['StoryCnt'] += epic['StroyCnt']
+                    initiative['StoryCnt'] += epic['StoryCnt']
                     initiative['StoryResolutionCnt'] += epic['StoryResolutionCnt']
 
             #print(initiative)
@@ -1426,7 +1451,7 @@ if __name__ == "__main__" :
     log = open('Initiative_logfile.txt', 'wt')
 
     # Create Excel workbook
-    workbook = xlsrd.load_workbook('Initiative일정관리_180504_v2.xlsx')
+    workbook = xlsrd.load_workbook('Initiative일정관리_180508.xlsx')
     org_sheet = workbook["최종"]
 
     workbook.copy_worksheet(org_sheet)
@@ -1586,4 +1611,4 @@ if __name__ == "__main__" :
     # 11. Jira상의 최신 정보를 Excel 문서에 Update 후 별도 Excel File로 저장한다.
     log.write("\n\n# 11. Jira상의 최신 정보를 Excel 문서에 Update 후 별도 Excel File로 저장한다.\n")
     print("\n################## Save Excel Sheet ##################")
-    workbook.save('Initiative일정관리_180504_Update.xlsx')
+    workbook.save('Initiative일정관리_180508_Update.xlsx')
