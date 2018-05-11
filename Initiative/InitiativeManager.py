@@ -40,7 +40,7 @@ myborder = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(st
 DevTracker = 'http://hlm.lge.com/issue'
 QTracker = 'http://hlm.lge.com/qi'
 
-#Release Version 1.3
+#Release Version 1.4
 
 startSP = 'TVSP16_1'
 endSP = 'TVSP18_2'
@@ -1421,6 +1421,8 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
         # write 비고
         func = '=IF(O{0}=P{1}, "", "일정변경")'.format(row_index, row_index)
         setXlsCell(Sheetname, row_index, CI_CM, func, False, None)
+        # write 금일기준
+        setXlsCell(Sheetname, row_index, CI_Today, initiative['TVSP'][updateSP], False, None)
 
         # write SP
         initiative['RescheduleCnt'] = 0
@@ -1514,6 +1516,9 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
             # write 비고
             func = '=IF(O{0}=P{1}, "", "일정변경")'.format(row_index, row_index)
             setXlsCell(Sheetname, row_index, CI_CM, func, False, None)
+
+            # write 금일기준
+            setXlsCell(Sheetname, row_index, CI_Today, epic['TVSP'][updateSP], False, None)
 
             # write RMS
             func = '=IF(ISNUMBER(FIND("RMS",H{0})), "O","")'.format(row_index)
@@ -1653,11 +1658,13 @@ if __name__ == "__main__" :
     # Initiative ========================================================================
     # 1. JIRA에서 Initiative Filter에 맞는 Initiative Key를 Jira로 구성한다. [ 'key1', 'key2', .... ]
     log.write("\n\n# 1. JIRA에서 Initiative Filter에 맞는 Initiative Key를 Jira로 구성한다. [ 'key1', 'key2', .... ]\n")
+    print("\n\n# 1. JIRA에서 Initiative Filter에 맞는 Initiative Key를 Jira로 구성한다. [ 'key1', 'key2', .... ]\n")
     Initiative_FilterResult = getFilteredInitiativeInfofromJira(dev_jira, 42101)
     jira_initiative_keylist = getInitiativeKeylistFromJira(Initiative_FilterResult)
 
     # 2. Excel로 부터 Initiative Key List를 구성한다. [ 'key1', 'key2', .... ]
-    log.write("\n\n# 2. Excel로 부터 Initiative Key List를 구성한다. [ 'key1', 'key2', .... ]\n")
+    log.write("\n\n# 2. Excel({0})로 부터 Initiative Key List를 구성한다. [ 'key1', 'key2', .... ]\n".format(openfilename))
+    print("\n\n# 2. Excel({0})로 부터 Initiative Key List를 구성한다. [ 'key1', 'key2', .... ]\n".format(openfilename))
     xls_initiative_keylist = getInitiativeKeylistFromXls(cur_sheet, 3)
 
     # 3. Jira상의 Initiative Key List와 엑셀상에 관리되는 Initiative Key List를 비교한다.
@@ -1749,5 +1756,5 @@ if __name__ == "__main__" :
     print("\n################## Save Excel Sheet ##################")
     cur_sheet.auto_filter.ref = 'A2:AZ2'
     workbook.save(savefilename)
-    #os.system('start excel.exe %s' % savefilename)
     log.close()
+    os.system('start excel.exe %s' % savefilename)
