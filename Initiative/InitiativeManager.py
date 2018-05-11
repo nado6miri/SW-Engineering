@@ -40,9 +40,16 @@ myborder = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(st
 DevTracker = 'http://hlm.lge.com/issue'
 QTracker = 'http://hlm.lge.com/qi'
 
+#Release Version 1.3
+
 startSP = 'TVSP16_1'
 endSP = 'TVSP18_2'
 updateSP = 'TVSP19_1'
+filename = "Initiative일정관리_180511_V2"
+openfilename = filename+".xlsx"
+savefilename = filename+"_AutoUpdate.xlsx"
+ID = ""
+PASSWORD = ""
 
 default_Sprint_Info = {
     'TVSP16_1' : '',  'TVSP16_2' : '',  'TVSP17_1' : '',  'TVSP17_2' : '',
@@ -1540,7 +1547,7 @@ def prepareNewXlsSheet(Sheetname, start_row, start_col) :
 #===========================================================================
 if __name__ == "__main__" :
     # jira Handle open
-    dev_jira = JIRA(DevTracker, basic_auth = ("", ""))
+    dev_jira = JIRA(DevTracker, basic_auth = (ID, PASSWORD))
 
     # create log file
     if (os.path.isfile("Initiative_logfile.txt")) :
@@ -1549,7 +1556,7 @@ if __name__ == "__main__" :
     log = open('Initiative_logfile.txt', 'wt')
 
     # Create Excel workbook
-    workbook = xlsrd.load_workbook('Initiative일정관리_180510_v1.xlsx')
+    workbook = xlsrd.load_workbook(openfilename)
     org_sheet = workbook["최종"]
 
     workbook.copy_worksheet(org_sheet)
@@ -1717,5 +1724,7 @@ if __name__ == "__main__" :
     # 11. Jira상의 최신 정보를 Excel 문서에 Update 후 별도 Excel File로 저장한다.
     log.write("\n\n# 11. Jira상의 최신 정보를 Excel 문서에 Update 후 별도 Excel File로 저장한다.\n")
     print("\n################## Save Excel Sheet ##################")
-    workbook.save('Initiative일정관리_180510_Update.xlsx')
+    cur_sheet.auto_filter.ref = 'A2:AZ2'
+    workbook.save(savefilename)
+    #os.system('start excel.exe %s' % savefilename)
     log.close()
