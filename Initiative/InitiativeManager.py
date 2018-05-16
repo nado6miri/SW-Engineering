@@ -35,17 +35,21 @@ myalignment = Alignment(horizontal='center', vertical='center')
 myfill = PatternFill(patternType='solid', fgColor=Color('000000'))
 myborder = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
 
-
-
+# Initiative_webOS4.5_Initial_Dev_EpicList (42101)
+#project = TVPLAT AND issuetype = Initiative AND fixVersion = "webOS TV 4.5 Initial" AND status not in (deferred, closed) AND (Component not in ("Deployment(manage)", _Governing) OR component is EMPTY)
+# Initiative_webOS4.5_Initial_Dev_EpicList (42317)
+# 관리 Epic 제외 : issuetype = Epic AND (component not in ("Deployment(manage)", _Governing) OR Component is EMPTY) AND issueFunction in linkedIssuesOf("project = TVPLAT and issuetype = Initiative and status not in (deferred, closed) and (component  not in (_Governing, 'Deployment(manage)') or Component is Empty) and fixVersion = 'webOS TV 4.5 Initial'")
+# 관리 Epic 포함 : issuetype = Epic AND issueFunction in linkedIssuesOf("project = TVPLAT and issuetype = Initiative and status not in (deferred, closed) and (component  not in (_Governing, 'Deployment(manage)') or Component is Empty) and fixVersion = 'webOS TV 4.5 Initial'")
 DevTracker = 'http://hlm.lge.com/issue'
 QTracker = 'http://hlm.lge.com/qi'
 
-#Release Version 1.4
+#Release Version 1.5
 
 startSP = 'TVSP16_1'
 endSP = 'TVSP18_2'
 updateSP = 'TVSP19_1'
-filename = "Initiative일정관리_180511_V2"
+filename = "Initiative일정관리_180514_V1"
+logfilename = filename+"_log.txt"
 openfilename = filename+".xlsx"
 savefilename = filename+"_AutoUpdate.xlsx"
 ID = ""
@@ -70,11 +74,13 @@ default_epic_info = {
         'duedate' : '',
         'Status' : '',
         'CreatedDate' : '',
-        'TVSP' : { },
-        'StoryCnt': '',
-        'StoryResolutionCnt' : '',
-        'RescheduleCnt' : '',
+        'TVSP' : default_Sprint_Info,
+        'StoryCnt': 0,
+        'StoryResolutionCnt' : 0,
+        'RescheduleCnt' : 0,
         'STORY' : [],
+        'AbnormalEpicSprint' : '',
+        "GovOrDeployment" : '',
     }
 
 default_initiative_info = {
@@ -92,19 +98,21 @@ default_initiative_info = {
     'CCC' : [],
     'TestCase' : [],
     'Dev_Verification' : [],
-    'TVSP' : {},
+    'TVSP' : default_Sprint_Info,
     'Status Color' : '',
     'SE_Delivery' : '',
     'SE_Quality' : '',
     'ScopeOfChange' : '',
     'EpicCnt' : '',
     'EpicResolutionCnt' : '',
-    'StoryCnt' : '',
-    'StoryResolutionCnt' : '',
+    'StoryCnt' : 0,
+    'StoryResolutionCnt' : 0,
     'RMS' : '',
-    'RescheduleCnt' : '',
-    'EpicDelayedCnt' : '',
+    'RescheduleCnt' : 0,
+    'EpicDelayedCnt' : 0,
     'STEOnSite' : '',
+    'AbnormalEpicSprint' : '',
+    "GovOrDeployment" : '',
         }
 
 
@@ -221,6 +229,28 @@ def getComponents(jiraIssue) :
 
 
 #===========================================================================
+# Get components of jira
+# [param] jiraIssue : json object of jira
+# [return] components[]
+#===========================================================================
+def checkGovDeployComponents(jiraIssue) :
+    value = jiraIssue.raw['fields']['components']
+
+    if(value != None) :
+        for comp in value :
+            if(comp.contain("Deployment(manage)") :
+                print("[True] Governing or Deployment(manage) components = ", comp)
+                log.write("[True] Governing or Deployment(manage) components = ", comp)
+                return comp
+            if(comp.contain("_Governing") :
+                print("[True] Governing or Deployment(manage) components = ", comp)
+                log.write("[True] Governing or Deployment(manage) components = ", comp)
+                return comp
+    #print("components = Null")
+    return "X"
+
+
+#===========================================================================
 # Get Release Sprint of jira
 # [param] jiraIssue : json object of jira
 # [return] str
@@ -321,7 +351,66 @@ def conversionDuedateToSprint(duedate) :
     elif(targetDate >= TVSP32_Start) :
         return 'TVSP32이후항목'
 
+#===========================================================================
+# convert Sprint to duedate
+# [param] duedate : Sprint
+# [return] Datetime
+#===========================================================================
+def conversionSprnitToDatetime(Sprint) :
 
+    if(Sprint == 'TVSP11이전항목') :
+        result = datetime(2018, 1, 14)
+    elif(Sprint == 'TVSP11') :
+        result = datetime(2018, 1, 28)
+    elif(Sprint == 'TVSP12') :
+        result = datetime(2018, 2, 11)
+    elif(Sprint == 'TVSP13') :
+        result = datetime(2018, 2, 25)
+    elif(Sprint == 'TVSP14') :
+        result = datetime(2018, 3, 11)
+    elif(Sprint == 'TVSP15') :
+        result = datetime(2018, 4, 1)
+    elif(Sprint == 'TVSP16') :
+        result = datetime(2018, 4, 15)
+    elif(Sprint == 'TVSP17') :
+        result = datetime(2018, 4, 29)
+    elif(Sprint == 'TVSP18') :
+        result = datetime(2018, 5, 13)
+    elif(Sprint == 'TVSP19') :
+        result = datetime(2018, 5, 27)
+    elif(Sprint == 'TVSP20') :
+        result = datetime(2018, 6, 10)
+    elif(Sprint == 'TVSP21') :
+        result = datetime(2018, 6, 24)
+    elif(Sprint == 'TVSP22') :
+        result = datetime(2018, 7, 8)
+    elif(Sprint == 'TVSP23') :
+        result = datetime(2018, 7, 22)
+    elif(Sprint == 'TVSP24') :
+        result = datetime(2018, 8, 5)
+    elif(Sprint == 'TVSP25') :
+        result = datetime(2018, 8, 19)
+    elif(Sprint == 'TVSP26') :
+        result = datetime(2018, 9, 2)
+    elif(Sprint == 'TVSP27') :
+        result = datetime(2018, 9, 16)
+    elif(Sprint == 'TVSP28') :
+        result = datetime(2018, 9, 30)
+    elif(Sprint == 'TVSP29') :
+        result = datetime(2018, 10, 14)
+    elif(Sprint == 'TVSP30') :
+        result = datetime(2018, 10, 28)
+    elif(Sprint == 'TVSP31') :
+        result = datetime(2018, 11, 11)
+    elif(Sprint == 'TVSP32') :
+        result = datetime(2018, 11, 25)
+    elif(Sprint == 'TVSP32이후') :
+        result = datetime(2018, 12, 31)
+    else : #TVSP_UNDEF
+        result = datetime(2018, 12, 31)
+
+    log.write("Sprint = {0}, conversionSprnitToDatetime = {1}, ".format(Sprint, result))
+    return result
 
 #===========================================================================
 # convert ReleaseSprint to ShortSprint
@@ -648,12 +737,12 @@ def getEpicsMilestoneFromDesc(description, fieldtitle) :
 # [param] dissue : jira issue
 # [return] True (STE On Site) or False (None)
 #===========================================================================
-def checkSTEOnSite(dissue) :
+def checkLabels(dissue, labelname) :
     labels = getLabels(dissue)
     for label in labels :
-        if(label == "STE확인필요") :
-            return True
-    return False
+        if(label == labelname) :
+            return "O"
+    return "X"
 
 #####################################################################################################################
 # Exel Control
@@ -879,6 +968,7 @@ def getEpicInfofromXls(Sheetname, EpicKey) :
 
         if(getEpicKey == EpicKey) :
             #print("&&&&&&&&&&&&&&&  getEpicKey = {0} == EpicKey = {1}".format(getEpicKey, EpicKey))
+            #log.write("\n&&&&&&&&&&&&&&&  getEpicKey = {0} == EpicKey = {1}".format(getEpicKey, EpicKey))
             epic_info['Epic Key'] = getEpicKey
             epic_info['Release_SP'] = str(Sheetname.cell(row = row_index, column = CI_ReleaseSP).value).strip()
             spInfo = getSprintHistoryfromXls(Sheetname, getEpicKey, "EPIC", row_index)
@@ -891,6 +981,7 @@ def getEpicInfofromXls(Sheetname, EpicKey) :
         pass
     else :
         epic_info['Epic Key'] = EpicKey
+
         #log.write("\n@@ Not found Epic Key from xls = {0}\n".format(EpicKey))
 
     log.write(str(epic_info))
@@ -1150,8 +1241,8 @@ def getInitiativeDetailInfofromXls(Sheetname, IntiativeKeyList, Init_EpicList) :
             #print("\n######## {0} row - Update Initiative Detail information from Xls".format(rowIndex))
             initiative_info["Initiative Key"] = str(Sheetname.cell(row = rowIndex, column = CI_InitKey).value).strip()
             initiative_info["Release_SP"] = str(Sheetname.cell(row = rowIndex, column = CI_ReleaseSP).value).strip()
-            initiative_info["관리대상"] = str(Sheetname.cell(row = rowIndex, column = CI_SPE_M).value).strip()
-            initiative_info["Risk 관리 대상"] = str(Sheetname.cell(row = rowIndex, column = CI_SPE_R).value).strip()
+            #initiative_info["관리대상"] = str(Sheetname.cell(row = rowIndex, column = CI_SPE_M).value).strip()
+            #initiative_info["Risk 관리 대상"] = str(Sheetname.cell(row = rowIndex, column = CI_SPE_R).value).strip()
             #initiative_info["RMS"] = str(Sheetname.cell(row = rowIndex, column = CI_RMS).value).strip()
 
             #SP
@@ -1169,6 +1260,19 @@ def getInitiativeDetailInfofromXls(Sheetname, IntiativeKeyList, Init_EpicList) :
 
             result.append(initiative_info)
             #print(initiative_info)
+        #20180516 : else: 문은 bug fix - Excel에 Initative key가 없으나 JIRA상에 신규로 생성된 Initiative가 존재 하는 경우 신규 추가를 위해 필요함.
+        else :
+            initiative_info["Initiative Key"] = key
+            #EPIC
+            epic_list = getInitiativeEpicListsfromJira(Init_EpicList, key)
+            #print("<<<<<<<<<< Initiative Key = {0}, Epic List = {1} >>>>>>>>>>>>>>>>>".format(key, epic_list))
+            for epickey in epic_list :
+                # epicInfo = { 'Epic Key' : '', 'Summary' : '', Sprint_Info{ 'SP16_1' : '', 'SP16_2' : '', .... } }
+                epicInfo = copy.deepcopy(default_epic_info)
+                epicInfo['Epic Key'] = epickey
+                initiative_info['EPIC'].append(epicInfo)
+
+            result.append(initiative_info)
 
     return result
 
@@ -1235,7 +1339,12 @@ def getInitiativeDetailInfofromJira(Initiative_FilterResult, Epic_FilterResult, 
             initiative['StoryCnt'] = 0
             initiative['StoryResolutionCnt'] = 0
             initiative['EpicDelayedCnt'] = 0
-            initiative['STEOnSite'] = checkSTEOnSite(dissue)
+            initiative['STEOnSite'] = checkLabels(dissue, "STE확인필요")
+            initiative['관리대상'] = checkLabels(dissue, "SPE_M")
+            initiative['Risk 관리 대상'] = checkLabels(dissue, "SPE_R")
+            initiative['ScopeOfChange'] = getScopeOfChange(dissue)
+            initiative['GovOrDeployment'] = checkGovDeployComponents(dissue)
+            initative_due = conversionSprnitToDatetime(initiative['TVSP'][updateSP])
 
             for epic in initiative['EPIC'] :
                 #print("#######>>> Epic Key = ", epic['Epic Key'])
@@ -1247,6 +1356,7 @@ def getInitiativeDetailInfofromJira(Initiative_FilterResult, Epic_FilterResult, 
                     epic['Status'] = getStatus(epicissue)
                     epic['CreatedDate'] = getCreatedDate(epicissue)
                     epic['duedate'] = getDueDate(epicissue)
+                    epic['GovOrDeployment'] = checkGovDeployComponents(dissue)
 
                     #Epic DueDate미설정 항목은 미설정, Deliverd된 항목은 Resolution Date 기준으로 금주 Sprint 일정 Write
                     if(epic['Status'] == "Delivered" or epic['Status'] == "Resolved" or epic['Status'] == "Closed" or epic['Status'] == "Deferred") :
@@ -1260,6 +1370,7 @@ def getInitiativeDetailInfofromJira(Initiative_FilterResult, Epic_FilterResult, 
                             if(due < datetime.now()) :
                                 initiative['EpicDelayedCnt'] += 1
 
+                    # Support Story Calculation.............. but It takes so long time ....
                     sql = "'Epic Link' = " + epic['Epic Key']
                     setfield = [ 'status' ]
                     storyissue = getFilterQueryResult(dev_jira, sql, getFieldList=setfield)
@@ -1269,6 +1380,11 @@ def getInitiativeDetailInfofromJira(Initiative_FilterResult, Epic_FilterResult, 
                     epic['StoryResolutionCnt'] = getChildStorynTaskResolvedCntfromJira(storyissue)
                     initiative['StoryCnt'] += epic['StoryCnt']
                     initiative['StoryResolutionCnt'] += epic['StoryResolutionCnt']
+                    if(initative_due < conversionSprnitToDatetime(epic['TVSP'][updateSP])) :
+                        if(epic['Status'] != "Delivered" and epic['Status'] != "Resolved" and epic['Status'] != "Closed" and epic['Status'] != "Deferred") :
+                            initiative['AbnormalEpicSprint'] = "O"
+                            epic['AbnormalEpicSprint'] = "O"
+
 
             #print(initiative)
             resultDB.append(initiative)
@@ -1401,15 +1517,15 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
         setXlsCell(Sheetname, row_index, CI_Summary, initiative['Summary'], False, None)
 
         # write Owner
-        func = '=VLOOKUP(J{0},조직정보!$A$1:$E$8295,2,FALSE)'.format(row_index)
+        func = '=VLOOKUP(J{0},조직정보!$A$1:$E$5000,2,FALSE)'.format(row_index)
         setXlsCell(Sheetname, row_index, CI_Owner, func, False, None)
         # write Assignee
         setXlsCell(Sheetname, row_index, CI_Assignee, initiative['Assignee'], False, None)
         # write 조직책임자
-        func = '=VLOOKUP(J{0},조직정보!$A$1:$E$8295,5,FALSE)'.format(row_index)
+        func = '=VLOOKUP(J{0},조직정보!$A$1:$E$5000,5,FALSE)'.format(row_index)
         setXlsCell(Sheetname, row_index, CI_OrganizationLeader, func, False, None)
         # write 조직
-        func = '=VLOOKUP(J{0},조직정보!$A$1:$E$8295,4,FALSE)'.format(row_index)
+        func = '=VLOOKUP(J{0},조직정보!$A$1:$E$5000,4,FALSE)'.format(row_index)
         setXlsCell(Sheetname, row_index, CI_Organization, func, False, None)
 
         # write Status
@@ -1430,13 +1546,13 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
         for key, value in initiative['TVSP'].items() :
             colpos = getColumnIndex(Sheetname, 2, key)
             setXlsCell(Sheetname, row_index, colpos, value, False, None)
-            if(schedule != value and (value != "미설정" and value != "기완료")) :
+            if(schedule != value and (value != "미설정" and value != "기완료" and value != "" and value != "TVSP_UNDEF" and value != "None")) :
+                print("++ Case : Initiative key = {}, schedule = {}, value = {}".format(initiative['Initiative Key'], schedule, value))
                 initiative['RescheduleCnt'] += 1
                 schedule =  value
 
         # write 일정변경Cnt
         setXlsCell(Sheetname, row_index, CI_ReschedCnt, initiative['RescheduleCnt'], False, None)
-
 
 
         # write EpicCnt
@@ -1447,22 +1563,22 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
         setXlsCell(Sheetname, row_index, CI_EpicDelayedCnt, initiative['EpicDelayedCnt'], False, None)
         # write EpicResolutionRate
         if(initiative['EpicCnt'] > 0) :
-            Rate = int(initiative['EpicResolutionCnt']*100 / initiative['EpicCnt'])
+            EpicRate = int(initiative['EpicResolutionCnt']*100 / initiative['EpicCnt'])
         else :
-            Rate = 0
-        Rate = "{0}%".format(Rate)
-        setXlsCell(Sheetname, row_index, CI_EpicResolutionRate, Rate, False, None)
+            EpicRate = 0
+        EpicRate = "{0}%".format(EpicRate)
+        setXlsCell(Sheetname, row_index, CI_EpicResolutionRate, EpicRate, False, None)
         # write StoryCnt
         setXlsCell(Sheetname, row_index, CI_StoryCnt, initiative['StoryCnt'], False, None)
         # write StoryResolutionCnt
         setXlsCell(Sheetname, row_index, CI_StoryReolutionCnt, initiative['StoryResolutionCnt'], False, None)
         # write StoryResolutionRate
         if(initiative['StoryCnt'] > 0) :
-            Rate = int(initiative['StoryResolutionCnt']*100 / initiative['StoryCnt'])
+            StoryRate = int(initiative['StoryResolutionCnt']*100 / initiative['StoryCnt'])
         else :
-            Rate = 0
-        Rate = "{0}%".format(Rate)
-        setXlsCell(Sheetname, row_index, CI_StoryReolutionRate, Rate, False, None)
+            StoryRate = 0
+        StoryRate = "{0}%".format(StoryRate)
+        setXlsCell(Sheetname, row_index, CI_StoryReolutionRate, StoryRate, False, None)
 
         # write RMS
         func = '=IF(ISNUMBER(FIND("RMS",H{0})), "O","")'.format(row_index)
@@ -1471,9 +1587,19 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
         # write STE On Site
         setXlsCell(Sheetname, row_index, CI_STEOnSite, initiative['STEOnSite'], False, None)
 
+        # write Scope of Change
+        setXlsCell(Sheetname, row_index, CI_Scope, initiative['ScopeOfChange'], False, None)
+
+        # write Abnormal Epic
+        setXlsCell(Sheetname, row_index, CI_AbEpicSprint, initiative['AbnormalEpicSprint'], False, None)
+
+        # write Governing or Deployment Issue
+        setXlsCell(Sheetname, row_index, CI_GovOrDeployment, initiative['GovOrDeployment'], False, None)
+
         row_index += 1
         index += 1
         for epic in initiative['EPIC'] :
+            StoryRate = 0
             initlinkinfo = "http://hlm.lge.com/issue/browse/"+str(initiative['Initiative Key'])
             epiclinkinfo = "http://hlm.lge.com/issue/browse/"+str(epic['Epic Key'])
             # write No Column
@@ -1491,15 +1617,15 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
             setXlsCell(Sheetname, row_index, CI_Summary, epic['Summary'], False, None)
 
             # write Owner
-            func = '=VLOOKUP(J{0},조직정보!$A$1:$E$8295,2,FALSE)'.format(row_index)
+            func = '=VLOOKUP(J{0},조직정보!$A$1:$E$5000,2,FALSE)'.format(row_index)
             setXlsCell(Sheetname, row_index, CI_Owner, func, False, None)
             # write Assignee
             setXlsCell(Sheetname, row_index, CI_Assignee, epic['Assignee'], False, None)
             # write 조직책임자
-            func = '=VLOOKUP(J{0},조직정보!$A$1:$E$8295,5,FALSE)'.format(row_index)
+            func = '=VLOOKUP(J{0},조직정보!$A$1:$E$5000,5,FALSE)'.format(row_index)
             setXlsCell(Sheetname, row_index, CI_OrganizationLeader, func, False, None)
             # write 조직
-            func = '=VLOOKUP(J{0},조직정보!$A$1:$E$8295,4,FALSE)'.format(row_index)
+            func = '=VLOOKUP(J{0},조직정보!$A$1:$E$5000,4,FALSE)'.format(row_index)
             setXlsCell(Sheetname, row_index, CI_Organization, func, False, None)
 
             # write Status
@@ -1518,6 +1644,8 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
             setXlsCell(Sheetname, row_index, CI_CM, func, False, None)
 
             # write 금일기준
+            # 20180516
+            #print("금일기준 : epic key = {}, updateSP = {}, epic['TVSP'] = {}".format(epic['Epic Key'], updateSP, epic['TVSP']))
             setXlsCell(Sheetname, row_index, CI_Today, epic['TVSP'][updateSP], False, None)
 
             # write RMS
@@ -1525,12 +1653,12 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
             setXlsCell(Sheetname, row_index, CI_RMS, func, False, None)
 
             # write StoryResolutionRate
-            if(initiative['StoryCnt'] > 0) :
-                Rate = int(initiative['StoryResolutionCnt']*100 / initiative['StoryCnt'])
+            if(epic['StoryCnt'] > 0) :
+                StoryRate = int(epic['StoryResolutionCnt']*100 / epic['StoryCnt'])
             else :
-                Rate = 0
-            Rate = "{0}%".format(Rate)
-            setXlsCell(Sheetname, row_index, CI_StoryReolutionRate, Rate, False, None)
+                StoryRate = 0
+            StoryRate = "{0}%".format(StoryRate)
+            setXlsCell(Sheetname, row_index, CI_StoryReolutionRate, StoryRate, False, None)
 
             # write SP
             epic['RescheduleCnt'] = 0
@@ -1538,13 +1666,17 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
             for key, value in epic['TVSP'].items() :
                 colpos = getColumnIndex(Sheetname, 2, key)
                 setXlsCell(Sheetname, row_index, colpos, value, False, None)
-                if(schedule != value and (value != "미설정" and value != "기완료")) :
+                if(schedule != value and (value != "미설정" and value != "기완료" and value != "" and value != "TVSP_UNDEF" and value != "None")) :
+                    print("++ Case : epic key = {}, schedule = {}, value = {}".format(epic['Epic Key'], schedule, value))
                     epic['RescheduleCnt'] += 1
                     schedule =  value
 
             # write 일정변경Cnt
             setXlsCell(Sheetname, row_index, CI_ReschedCnt, epic['RescheduleCnt'], False, None)
-
+            # write Abnormal Epic
+            setXlsCell(Sheetname, row_index, CI_AbEpicSprint, epic['AbnormalEpicSprint'], False, None)
+            # write Governing or Deployment Issue
+            setXlsCell(Sheetname, row_index, CI_GovOrDeployment, epic['GovOrDeployment'], False, None)
 
             row_index += 1
             index += 1
@@ -1575,10 +1707,10 @@ if __name__ == "__main__" :
     dev_jira = JIRA(DevTracker, basic_auth = (ID, PASSWORD))
 
     # create log file
-    if (os.path.isfile("Initiative_logfile.txt")) :
-        os.remove("Initiative_logfile.txt")
+    if (os.path.isfile(logfilename)) :
+        os.remove(logfilename)
 
-    log = open('Initiative_logfile.txt', 'wt')
+    log = open(logfilename, 'wt')
 
     # Create Excel workbook
     workbook = xlsrd.load_workbook(openfilename)
@@ -1623,8 +1755,11 @@ if __name__ == "__main__" :
     CI_StoryReolutionCnt = getColumnIndex(cur_sheet, 2, "StoryReolutionCnt")
     CI_StoryReolutionRate = getColumnIndex(cur_sheet, 2, "Story진행율")
     CI_RMS = getColumnIndex(cur_sheet, 2, "RMS")
+    CI_Scope = getColumnIndex(cur_sheet, 2, "Scope")
     CI_ReschedCnt = getColumnIndex(cur_sheet, 2, "ReschedCnt")
     CI_STEOnSite = getColumnIndex(cur_sheet, 2, "STE투입")
+    CI_AbEpicSprint = getColumnIndex(cur_sheet, 2, "Abnormal Epic Sprint")
+    CI_GovOrDeployment = getColumnIndex(cur_sheet, 2, "GovOrDeployment")
 
 
     #print("Type = {0}, Epic Key = {1}, Initiative Key = {2}, Release_SP = {3}".format(CI_IssueType, CI_EpicKey, CI_InitKey, CI_ReleaseSP))
@@ -1708,12 +1843,12 @@ if __name__ == "__main__" :
 
     log.write("\n################## New Epic List (JIRA - Excel) ##################\n")
     print("\n################## New Epic List (JIRA - Excel) ##################")
-    newEpickey = getDiffList(jira_Issuelinks_epic_keylist, xls_epic_keylist)
+    newEpickey = getDiffList(new_filtered_epickey, xls_epic_keylist)
     #print(newEpickey)
     log.write(str(newEpickey))
     log.write("\n################## Del Epic List (Excel - JIRA) ##################\n")
     print("\n################## Del Epic List (Excel - JIRA) ##################")
-    delEpickey = getDiffList(xls_epic_keylist, jira_Issuelinks_epic_keylist)
+    delEpickey = getDiffList(xls_epic_keylist, new_filtered_epickey)
     log.write(str(delEpickey))
     #print(delEpickey)
 
