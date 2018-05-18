@@ -43,11 +43,11 @@ myborder = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(st
 DevTracker = 'http://hlm.lge.com/issue'
 QTracker = 'http://hlm.lge.com/qi'
 
-#Release Version 1.5
+#Release Version 1.6
 
 startSP = 'TVSP16_1'
-endSP = 'TVSP18_2'
-updateSP = 'TVSP19_1'
+endSP = 'TVSP19_1'
+updateSP = 'TVSP19_2'
 filename = "Initiative일정관리_180514_V1"
 logfilename = filename+"_log.txt"
 openfilename = filename+".xlsx"
@@ -231,21 +231,22 @@ def getComponents(jiraIssue) :
 #===========================================================================
 # Get components of jira
 # [param] jiraIssue : json object of jira
-# [return] components[]
+# [return] "O" or "X"
 #===========================================================================
 def checkGovDeployComponents(jiraIssue) :
     value = jiraIssue.raw['fields']['components']
 
     if(value != None) :
         for comp in value :
-            if(comp.contain("Deployment(manage)") :
-                print("[True] Governing or Deployment(manage) components = ", comp)
-                log.write("[True] Governing or Deployment(manage) components = ", comp)
-                return comp
-            if(comp.contain("_Governing") :
-                print("[True] Governing or Deployment(manage) components = ", comp)
-                log.write("[True] Governing or Deployment(manage) components = ", comp)
-                return comp
+            #print("********* Comp = ", comp)
+            if("Deployment(manage)" in comp['name']) :
+                #print("[True] Governing or Deployment(manage) components = ", comp['name'])
+                log.write("[True] Deployment(manage) components = {}".format(comp['name']))
+                return "O"
+            if("_Governing" in comp['name']) :
+                #print("[True] Governing or Deployment(manage) components = ", comp['name'])
+                log.write("[True] Governing components = {}".format(comp['name']))
+                return "O"
     #print("components = Null")
     return "X"
 
@@ -1356,7 +1357,7 @@ def getInitiativeDetailInfofromJira(Initiative_FilterResult, Epic_FilterResult, 
                     epic['Status'] = getStatus(epicissue)
                     epic['CreatedDate'] = getCreatedDate(epicissue)
                     epic['duedate'] = getDueDate(epicissue)
-                    epic['GovOrDeployment'] = checkGovDeployComponents(dissue)
+                    epic['GovOrDeployment'] = checkGovDeployComponents(epicissue)
 
                     #Epic DueDate미설정 항목은 미설정, Deliverd된 항목은 Resolution Date 기준으로 금주 Sprint 일정 Write
                     if(epic['Status'] == "Delivered" or epic['Status'] == "Resolved" or epic['Status'] == "Closed" or epic['Status'] == "Deferred") :
@@ -1425,7 +1426,7 @@ def getFilteredInitiativeInfofromJira(jiraHandle, filterid) :
         result = getFilterIDResult(jiraHandle, Initiative_webOS45_Initial_Dev)
     else :
         #setfield = ('summary, assignee, duedate, created, labels, status')
-        setfield = ['summary', 'assignee', 'duedate', 'created', 'labels', 'status', 'issuelinks', 'resolutiondate' ]
+        setfield = ['summary', 'assignee', 'duedate', 'created', 'labels', 'status', 'issuelinks', 'resolutiondate', 'components' ]
         result = getFilterIDResult(jiraHandle, Initiative_webOS45_Initial_Dev, setfield)
 
     return result
@@ -1547,7 +1548,7 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
             colpos = getColumnIndex(Sheetname, 2, key)
             setXlsCell(Sheetname, row_index, colpos, value, False, None)
             if(schedule != value and (value != "미설정" and value != "기완료" and value != "" and value != "TVSP_UNDEF" and value != "None")) :
-                print("++ Case : Initiative key = {}, schedule = {}, value = {}".format(initiative['Initiative Key'], schedule, value))
+                #print("++ Case : Initiative key = {}, schedule = {}, value = {}".format(initiative['Initiative Key'], schedule, value))
                 initiative['RescheduleCnt'] += 1
                 schedule =  value
 
@@ -1667,7 +1668,7 @@ def updateInitiativeDetailInfoToXls(Sheetname, finalinfo) :
                 colpos = getColumnIndex(Sheetname, 2, key)
                 setXlsCell(Sheetname, row_index, colpos, value, False, None)
                 if(schedule != value and (value != "미설정" and value != "기완료" and value != "" and value != "TVSP_UNDEF" and value != "None")) :
-                    print("++ Case : epic key = {}, schedule = {}, value = {}".format(epic['Epic Key'], schedule, value))
+                    #print("++ Case : epic key = {}, schedule = {}, value = {}".format(epic['Epic Key'], schedule, value))
                     epic['RescheduleCnt'] += 1
                     schedule =  value
 
@@ -1807,12 +1808,12 @@ if __name__ == "__main__" :
     log.write("\n################## New Initiative List (JIRA - Excel) ##################\n")
     print("\n################## New Initiative List (JIRA - Excel) ##################")
     newkey = getDiffList(jira_initiative_keylist, xls_initiative_keylist)
-    #print(newkey)
+    print(newkey)
     log.write(str(newkey))
     print("\n################## Del Initiative List (Excel - JIRA) ##################")
     log.write("\n################## Del Initiative List (Excel - JIRA) ##################\n")
     delkey = getDiffList(xls_initiative_keylist, jira_initiative_keylist)
-    #print(delkey)
+    print(delkey)
     log.write(str(delkey))
 
 
@@ -1833,24 +1834,24 @@ if __name__ == "__main__" :
     log.write("\n################## Compare1 Epic List (jira filter - jira link) ##################\n")
     print("\n################## Compare1 Epic List (jira filter - jira link) ##################")
     new_issuelinks_epickey = getDiffList(jira_epic_keylist, jira_Issuelinks_epic_keylist)
-    #print(new_issuelinks_epickey)
+    print(new_issuelinks_epickey)
     log.write(str(new_issuelinks_epickey))
     log.write("\n################## Compare2 Epic List (jira link - jira filter) ##################\n")
     print("\n################## Compare2 Epic List (jira link - jira filter) ##################")
     new_filtered_epickey = getDiffList(jira_Issuelinks_epic_keylist, jira_epic_keylist)
-    #print(new_filtered_epickey)
+    print(new_filtered_epickey)
     log.write(str(new_filtered_epickey))
 
     log.write("\n################## New Epic List (JIRA - Excel) ##################\n")
     print("\n################## New Epic List (JIRA - Excel) ##################")
     newEpickey = getDiffList(new_filtered_epickey, xls_epic_keylist)
-    #print(newEpickey)
+    print(newEpickey)
     log.write(str(newEpickey))
     log.write("\n################## Del Epic List (Excel - JIRA) ##################\n")
     print("\n################## Del Epic List (Excel - JIRA) ##################")
     delEpickey = getDiffList(xls_epic_keylist, new_filtered_epickey)
     log.write(str(delEpickey))
-    #print(delEpickey)
+    print(delEpickey)
 
     # 7. 각 Initiative 하위에 존재하는 Epick List 구성
     log.write("\n\n# 7. 각 Initiative 하위에 존재하는 Epick List 구성\n")
