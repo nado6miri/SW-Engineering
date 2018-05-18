@@ -43,16 +43,16 @@ myborder = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(st
 DevTracker = 'http://hlm.lge.com/issue'
 QTracker = 'http://hlm.lge.com/qi'
 
-#Release Version 1.6
+#Release Version 1.6.1
 
 startSP = 'TVSP16_1'
 endSP = 'TVSP19_1'
 updateSP = 'TVSP19_2'
-filename = "Initiative일정관리_180514_V1"
+filename = "Initiative일정관리_180521_V1"
 logfilename = filename+"_log.txt"
 openfilename = filename+".xlsx"
 savefilename = filename+"_AutoUpdate.xlsx"
-ID = ""
+ID = "sungbin.na"
 PASSWORD = ""
 
 default_Sprint_Info = {
@@ -1844,12 +1844,12 @@ if __name__ == "__main__" :
 
     log.write("\n################## New Epic List (JIRA - Excel) ##################\n")
     print("\n################## New Epic List (JIRA - Excel) ##################")
-    newEpickey = getDiffList(new_filtered_epickey, xls_epic_keylist)
+    newEpickey = getDiffList(jira_epic_keylist, xls_epic_keylist)
     print(newEpickey)
     log.write(str(newEpickey))
     log.write("\n################## Del Epic List (Excel - JIRA) ##################\n")
     print("\n################## Del Epic List (Excel - JIRA) ##################")
-    delEpickey = getDiffList(xls_epic_keylist, new_filtered_epickey)
+    delEpickey = getDiffList(xls_epic_keylist, jira_epic_keylist)
     log.write(str(delEpickey))
     print(delEpickey)
 
