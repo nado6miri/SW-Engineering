@@ -5,6 +5,23 @@ var fs = require('fs');
 var url = require('url');
 const express = require('express');
 const app = express();
+const fse = require('fs-extra');
+
+var XMLHttpRequest = require('xmlhttprequest-ssl').XMLHttpRequest;
+
+// Express에서 정적 파일 제공 방법
+// http://expressjs.com/ko/starter/static-files.html
+// app.use(express.static('public')); // public folder의 file 제공
+// http://localhost:3000/images/kitten.jpg
+// http://localhost:3000/css/style.css
+
+// app.use('/static', express.static('public')); // 가상의 /static url로 제공
+// http://localhost:3000/static/images/kitten.jpg
+// http://localhost:3000/static/css/style.css
+
+// important : express.static 함수에 제공되는 경로는 node 프로세스가 실행되는 디렉토리에 대해 상대적입니다. 
+// Express 앱을 다른 디렉토리에서 실행하는 경우에는 다음과 같이 제공하기 원하는 디렉토리의 절대 경로를 사용하는 것이 더 안전합니다.
+// app.use('/static', express.static(__dirname + '/public'));
 
 var mime = {
   html: 'text/html',
@@ -72,12 +89,12 @@ app.get('/img', (req, res) => {
     //read the image using fs and send the image content back in the response
     fs.readFile(__dirname + '/img/' + pic, function (err, content) {
         if (err) {
-            res.writeHead(400, {'Content-type':'text/html'})
+            res.writeHead(400, {'Content-type':'text/html; charset=utf-8'})
             console.log(err);
             res.end("No such image");    
         } else {
             //specify the content type in the response will be an image
-            res.writeHead(200,{'Content-type':'image/jpg'});
+            res.writeHead(200,{'Content-type':'image/jpg; charset=utf-8'});
             res.end(content);
         }
     });
@@ -94,6 +111,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 var httpServer = http.createServer(app).listen(3000, function(req,res){
   console.log('Socket IO server has been started');
+  /* CORS 대응*/
+  response.setHeader('Access-Control-Allow-Origin', '*');
+  response.setHeader('Access-Control-Request-Method', '*');
+  response.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
+  response.setHeader('Access-Control-Allow-Headers', '*');
+
+		//1. 요청자원이 /update 이면 SVLJIRA로 부터 CCC 관련 정보를 Get
+		if(resource == '/update'){
+			//Check_Session_Login();
+			Timer_Setting();
+    }  
+    
+    // How to parse URL....
+    // var newURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
+    if(resource.search('/GRAPHIC/CCC')!=-1) // /GRAPHIC/CCC path Search
+
 });
 
 // upgrade http server to socket.io server
@@ -115,3 +148,248 @@ io.sockets.on('connection',function(socket)
 
 
 
+//===========================================================================================
+
+function Check_Session_Login()
+{
+	var searchURL = "http://10.164.2.76/rest/auth/1/session";
+
+	var xhttp = new XMLHttpRequest();
+	
+	xhttp.onreadystatechange = function()
+	{
+		if (xhttp.readyState === 4)
+		{
+			if (xhttp.status === 200)
+			{
+				var resultJSON = JSON.parse(xhttp.responseText);
+                console.log("====> Found SVLJIRA log-in id : "+resultJSON.name);
+				//CCC_Gathering_Status_Init();
+				setTimeout(CCC_Gathering, 1000);
+			}
+            else
+            {
+                console.log("Not log-in at SVLJIRA --> Need log-in !");
+                setTimeout(Post_Login_Session,1000);
+            }			
+		}
+        else
+        {
+            console.log("Check_Session_Login --> readyState : "+xhttp.readyState);
+        }
+	};
+	xhttp.open("GET", searchURL, true, id, pwd);	
+	xhttp.withCredentials = true;
+	xhttp.setRequestHeader("Content-Type","application/json; charset=utf-8");
+	xhttp.send();
+}
+ 
+function Post_Login_Session()
+{
+	var url = "http://10.164.2.76/rest/auth/1/session";
+	
+	var xhttp = new XMLHttpRequest();
+	
+	xhttp.onreadystatechange = function()
+	{
+		if (xhttp.readyState === 4)
+		{
+			if (xhttp.status === 200)
+			{
+				var resultJSON = JSON.parse(xhttp.responseText);
+                console.log("====> login success at Jira2 !!");
+			    console.log("====> Found SVLJIRA log-in id : "+resultJSON.name);
+           
+				setTimeout(Check_Session_Login, 1000);
+            }
+            else
+            {
+				setTimeout(Post_Login_Session,1000);
+                console.log("Post_Login_Session failed -->status : "+xhttp.status);
+            }
+		}
+		else
+		{
+			console.log("Post_Login_Session --> readyState : "+xhttp.readyState)
+		}
+	};
+	xhttp.open("POST", url, true, id, pwd);
+	xhttp.withCredentials = true;
+	xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+	xhttp.send(JSON.stringify(authObj));
+}
+
+
+function postJSONResult_InstallMONTHCCCReview(param,searchURL,index)
+{
+	var xhttp = new XMLHttpRequest();
+	
+    xhttp.onreadystatechange = function()
+    {
+         if (xhttp.readyState === 4)
+         {
+            if (xhttp.status === 200)
+            {
+				var resultJSON = JSON.parse(xhttp.responseText);
+				console.log(resultJSON.total);
+				var json = JSON.stringify(resultJSON);
+				fse.outputFileSync("./"+MONTH_CCC_FILE_ARRAY[index],json, 'utf-8', function(e){
+					if(e){
+						console.log(e);
+					}else{
+						console.log("Download is done!");	
+					}
+				});
+				MONTH_CCC_GATHERING_STATUS[index] = 1;
+                console.log("MONTH CCC gathering ok ("+index+")");
+            }
+            else
+            {
+                (function f(x){
+                setTimeout(function (){postJSONResult_InstallMONTHCCCReview(param,searchURL,index);},1000);
+                }(index));
+            }
+        }
+    };
+	xhttp.open("POST", searchURL, true, id, pwd);
+    xhttp.withCredentials = true;
+    xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+    xhttp.send(JSON.stringify(param));
+} 
+
+
+function Request_MonthCCCData_toSVL()
+{
+	var param_MonthCCC = new Array();
+	console.log("Month CCC Request Number = %d", MONTH_CCC_QUERY.length);
+	for(var i=0;i<MONTH_CCC_QUERY.length;i++)
+	{
+		param_MonthCCC[i] = {"jql": MONTH_CCC_QUERY[i],"maxResults":1000,"startAt":0, "fields":["status"]};
+		(function f(x){
+			setTimeout(function (){postJSONResult_InstallMONTHCCCReview(param_MonthCCC[x],CCCSearchURL,x);},x*1000);
+		}(i));
+	}
+}
+
+
+
+function Timer_Setting()
+{
+		var x = {
+					hours: 0,
+					minutes: 0,
+					seconds: 0
+				};
+
+		var dtAlarm = new Date();
+		dtAlarm.setHours(x.hours);
+		dtAlarm.setMinutes(x.minutes);
+		dtAlarm.setSeconds(x.seconds);
+		var dtNow = new Date();
+
+		if (dtAlarm - dtNow > 0) {
+			console.log('Later today, no changes needed!');
+		}
+		else {
+			console.log('Tomorrow, changing date to tomorrow');
+			dtAlarm.setDate(dtAlarm.getDate() + 1);
+		}
+
+		var diff = dtAlarm - new Date();
+	
+		setTimeout(Request_DataAcq_Trigger, diff);
+}
+
+function Request_DataAcq_Trigger()
+{
+		console.log("Request Data#1!!");
+		Check_Session_Login();
+		setInterval(Check_Session_Login, 86400000); //24 hour 마다 Data Gathering
+}
+
+function CCC_Gathering()
+{
+	
+	CCCSearchURL = "http://10.164.2.76/rest/api/2/search";
+	
+	console.log("CCC_Gathering~Start");
+	
+	CCC_Gathering_Status_Init();
+	RequesttoSVL_Trigger_Int();
+	
+	/***********************************************************************************************************/
+	/******************************Query 생성 Part ***********************************************/
+	/***********************************************************************************************************/	
+	/***********************************************************************************************************/
+	Generate_Query();
+	CCC_Gathering_Status_Check();
+}
+
+var port = 27024;
+
+//var id = "Integrator Tvsw";
+//var pwd = "Password!!11";
+var id = "Hongcheol Eom";
+var pwd = "!Min0712486!";
+   authObj = {
+	"password" : pwd,
+	"username" : id
+};
+
+
+function Request_MonthlyDPTERR_toSVL(startIndex, endIndex)
+{
+	var param_DPTERR = new Array(DPT_MONTHLY_ERR_ARRAY.length);
+	console.log("Department ERR Request Number[%d] = %d", startIndex,(endIndex-startIndex)*DPT_MONTHLY_ERR_ARRAY[0].length);
+	for(var i=startIndex; i<endIndex; i++)
+	{
+		param_DPTERR[i] = new Array(DPT_MONTHLY_ERR_ARRAY[i].length);
+		
+		for(var j=0; j<DPT_MONTHLY_ERR_ARRAY[i].length; j++)
+		{
+			param_DPTERR[i][j] =  {"jql": MonthlyDPTERRQueryArray[i][j],"maxResults":1000,"startAt":0, "fields":["status"]};
+			(function f(x,y){
+					setTimeout(function (){postJSONResult_InstallDPTMonthlyERRReview(param_DPTERR[x][y],CCCSearchURL,x, y);},y*1000);
+			}(i,j));
+		}
+	}	
+}
+
+
+
+function postJSONResult_InstallDPTMonthlyERRReview(param, searchURL, index1, index2)
+{
+	var xhttp = new XMLHttpRequest();
+	
+    xhttp.onreadystatechange = function()
+    {
+        if (xhttp.readyState === 4)
+        {
+          if (xhttp.status === 200)
+            {
+                var resultJSON = JSON.parse(xhttp.responseText);
+				console.log(resultJSON.total);
+				var json = JSON.stringify(resultJSON);
+				fse.outputFileSync("./"+DPT_MONTHLY_ERR_ARRAY[index1][index2],json, 'utf-8', function(e){
+					if(e){
+						console.log(e);
+					}else{
+						console.log("Download is done!");
+					}
+				});
+				DPT_MONTHLY_ERR_GATHERING_STATUS[index1][index2]=1;
+				console.log("Monthly DPT ERR gathering ok (["+index1+"]["+index2+"])");
+			}
+			else
+            {
+                (function f(x, y){
+                    setTimeout(function (){postJSONResult_InstallDPTMonthlyERRReview(param,searchURL,index1,index2);},1000);
+                }(index1, index2));
+            }
+        }
+    };
+    xhttp.open("POST", searchURL, true, id, pwd);
+    xhttp.withCredentials = true;
+    xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+    xhttp.send(JSON.stringify(param));
+} 

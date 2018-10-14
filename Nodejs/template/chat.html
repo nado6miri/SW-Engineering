@@ -1,0 +1,91 @@
+<html>
+  <head>
+  <title></title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  </head>
+  <body>
+      <b>Send message</b><p>
+      Message  <input type="text" id="msgbox"/>
+      <br>
+      <div id="workflow" style = "position:relative;">
+        <img src="http://10.186.115.57:3000/img/?image=a.png"></img>
+        <div class="linkarea" style="top: 30px; left: 0px; width: 30px; height: 30px; cursor: pointer; position:absolute;" clicklink="http://www.naver.com">###</div>
+        <div class="linkarea" style="top: 30px; left: 300px; width: 30px; height: 30px; cursor: pointer; position:absolute;" clicklink="http://www.naver.com">###</div>
+      </div>
+      <div hidden id = 'hiddendata'></div>
+      <div id = 'summary region'>
+        <table id = 'static_summary_table'></table>
+      </div>
+      <span id="msgs"></span>
+      <script type="text/javascript">
+        $(document).ready(function() {
+            setDivLinks();
+        });
+
+        //https://javafa.gitbooks.io/nodejs_server_basic/content/chapter10.html
+        var socket = io.connect('http://localhost:3000');
+        $("#msgbox").keyup(function(event) {
+        if (event.which == 13) {
+            // send event with 'fromclient' message ID 
+            socket.emit('fromclient',{msg:$('#msgbox').val()});
+            $('#msgbox').val('');
+            }
+        });
+
+        // receive event with 'toclient' message ID 
+        socket.on('toclient',function(data){
+              console.log(data.msg);
+              $('#msgs').append(data.msg+'<BR>');
+          });
+
+    function setDivLinks()
+    {
+        $('div.linkarea').each(function(){
+            let link = $(this).attr("clicklink");
+            if(link != undefined && link != "")
+            {
+                $(this).css("cursor", "pointer").click(function(){
+                    window.open($(this).attr("clicklink"));
+                })
+            }
+        });
+    }
+
+    function display_initative(data) {
+        $("#rawdata").hide();
+        db = document.getElementById("hiddendata").innerHTML;
+        jsondata = JSON.parse(db);
+
+        $('#static_summary_table').empty(); // .remove()
+
+        for (index in header1) {
+            $('#static_summary_table').append($('<th>').html(header1[index]))
+        }
+
+        for (i = 0; i < jsondata.total; i++) {
+            var no = i + 1;
+            var type = "Initiative";
+            var key = jsondata["issues"][i]["key"];
+            var summary = jsondata["issues"][i]["fields"]["summary"];
+            var status = jsondata["issues"][i]["fields"]["status"]["name"];
+            var assignee = jsondata["issues"][i]["fields"]["assignee"]["displayName"];
+            assignee = assignee.substring(0, assignee.indexOf(' '));
+            var due = jsondata["issues"][i]["fields"]["due"];
+
+            //var tr = document.createElement("TR");
+            var tr = $('<tr>');
+            $('#static_summary_table').append(tr);
+            $(tr).append($('<td>').html(no));
+            $(tr).append($('<td>').html(type));
+            $(tr).append($('<td>').html('<a href="http://hlm.lge.com/issue/browse/' + key + '" target="_blank">' + key + '</a>'));
+            $(tr).append($('<td>').html('<a href="http://hlm.lge.com/issue/browse/' + key + '" target="_blank">' + summary + '</a>'));
+            $(tr).append($('<td>').html(assignee));
+            $(tr).append($('<td>').html(due));
+            $(tr).append($('<td>').html(status));
+        }
+    }
+
+    </script>
+  </body>
+  </html>
