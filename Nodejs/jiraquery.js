@@ -5,7 +5,6 @@ var fs = require('fs');
 var url = require('url');
 const express = require('express');
 const app = express();
-const fse = require('fs-extra');
 
 var XMLHttpRequest = require('xmlhttprequest-ssl').XMLHttpRequest;
 
@@ -72,8 +71,6 @@ app.get('/socketchat', (req, res) => {
     }
     res.end(data, 'utf-8'); // 브라우저로 전송  
   });
-
-  jquery_jira(res);
 });
 
 app.get('/img', (req, res) => {
@@ -111,30 +108,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 var httpServer = http.createServer(app).listen(3000, function(req,res){
   console.log('Socket IO server has been started');
-  /* CORS 대응*/
-  response.setHeader('Access-Control-Allow-Origin', '*');
-  response.setHeader('Access-Control-Request-Method', '*');
-  response.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
-  response.setHeader('Access-Control-Allow-Headers', '*');
-
-		//1. 요청자원이 /update 이면 SVLJIRA로 부터 CCC 관련 정보를 Get
-		if(resource == '/update'){
-			//Check_Session_Login();
-			Timer_Setting();
-    }  
-    
-    // How to parse URL....
-    // var newURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
-    if(resource.search('/GRAPHIC/CCC')!=-1) // /GRAPHIC/CCC path Search
-
 });
 
 // upgrade http server to socket.io server
 var io = require('socket.io').listen(httpServer);
 
 // http://bcho.tistory.com/899 
-io.sockets.on('connection',function(socket)
-{
+io.sockets.on('connection',function(socket){
    socket.emit('toclient',{msg:'Welcome !'});
    socket.on('fromclient',function(data){
        socket.broadcast.emit('toclient',data); // 자신을 제외하고 다른 클라이언트에게 보냄
@@ -145,7 +125,7 @@ io.sockets.on('connection',function(socket)
 
 
 
-
+/*
 
 
 //===========================================================================================
@@ -205,15 +185,24 @@ function Post_Login_Session()
             else
             {
 				setTimeout(Post_Login_Session,1000);
-                console.log("Post_Login_Session failed -->status : "+xhttp.status);
-            }
-		}
-		else
-		{
-			console.log("Post_Login_Session --> readyState : "+xhttp.readyState)
-		}
-	};
-	xhttp.open("POST", url, true, id, pwd);
+      }  
+            console.log("Post_Login_Session failed -->status : "+xhttp.status);
+      }  
+        }
+	  }  
+	}
+	  }  
+	else
+	  }  
+	{
+	  }  
+		console.log("Post_Login_Session --> readyState : "+xhttp.readyState)
+	  }  
+	}
+	  }  
+};
+	  }  
+xhttp.open("POST", url, true, id, pwd);
 	xhttp.withCredentials = true;
 	xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
 	xhttp.send(JSON.stringify(authObj));
@@ -317,18 +306,12 @@ function CCC_Gathering()
 	CCC_Gathering_Status_Init();
 	RequesttoSVL_Trigger_Int();
 	
-	/***********************************************************************************************************/
-	/******************************Query 생성 Part ***********************************************/
-	/***********************************************************************************************************/	
-	/***********************************************************************************************************/
 	Generate_Query();
 	CCC_Gathering_Status_Check();
 }
 
 var port = 27024;
 
-//var id = "Integrator Tvsw";
-//var pwd = "Password!!11";
 var id = "Hongcheol Eom";
 var pwd = "!Min0712486!";
    authObj = {
@@ -393,3 +376,4 @@ function postJSONResult_InstallDPTMonthlyERRReview(param, searchURL, index1, ind
     xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
     xhttp.send(JSON.stringify(param));
 } 
+*/
